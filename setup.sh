@@ -31,5 +31,6 @@ read -p "How many days you want to keep backup on Google Drive?(default 7): " DA
 change_gdrive_config BACKUP_DIR ${BACKUP_DIR}
 change_gdrive_config LOG_FILE ${LOG_FILE}
 change_gdrive_config DAY_REMOVE ${DAY_REMOVE}
-echo $PATH >> ${/var/spool/cron/root}
-echo "* * * * * sh /usr/sbin/cron_backup.sh >/dev/null 2>&1" >> ${/var/spool/cron/root}
+echo "PATH=$PATH" >> ${CRON_FILE}
+echo "* * * * * sh /usr/sbin/cron_backup.sh >/dev/null 2>&1" >> ${CRON_FILE}
+systemctl restart crond

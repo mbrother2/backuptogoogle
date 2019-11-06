@@ -42,22 +42,22 @@ do
     if [ ${#ID_DIR} -ne 33 ]
     then
         write_time_log
-        echo " `change_color blue [${USER_BACKUP}]``change_color red [CREATE][FAIL]` Can not create directory ${TODAY}"! Please check `change_color green GG_DIR_ID` again!>> ${LOG_FILE}
-        gdrive mkdir -p ${GG_DIR_ID} ${TODAY} 2>&1 | tee -a ${LOG_FILE}
+        echo " `change_color red [CREATE][FAIL]` Can not create directory ${TODAY}" >> ${LOG_FILE}
+        gdrive mkdir ${TODAY} 2>&1 | tee -a ${LOG_FILE}
     else
         if [ ${CHECK_BACKUP_DIR} -eq 0 ]
         then
             write_time_log
-            echo " `change_color blue [${USER_BACKUP}]``change_color green [CREATE]` Create directory ${TODAY} with ID ${ID_DIR}" >> ${LOG_FILE}
+            echo " `change_color green [CREATE]` Create directory ${TODAY} with ID ${ID_DIR}" >> ${LOG_FILE}
         fi
         write_time_log
         OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
         UPLOAD_FILE=`gdrive upload -p ${ID_DIR} /backup/$i`
         if [[ "${UPLOAD_FILE}" == *"Error"* ]]
         then
-            echo " `change_color blue [${USER_BACKUP}]``change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}" >> ${LOG_FILE}
+            echo " `change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}" >> ${LOG_FILE}
         else
-            echo " `change_color blue [${USER_BACKUP}]``change_color green [UPLOAD]` Upload file /backup/$i to directory ${TODAY}" >> ${LOG_FILE}
+            echo " `change_color green [UPLOAD]` Upload file /backup/$i to directory ${TODAY}" >> ${LOG_FILE}
             echo ${UPLOAD_FILE} >> ${LOG_FILE}
         fi
         if [ "${OLD_BACKUP_ID}" != "" ]
@@ -67,9 +67,9 @@ do
             OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
             if [ "${OLD_BACKUP_ID}" == "" ]
             then
-                echo " `change_color blue [${USER_BACKUP}]``change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}" >> ${LOG_FILE}
+                echo " `change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}" >> ${LOG_FILE}
             else
-                echo " `change_color blue [${USER_BACKUP}]``change_color red [REMOVE][FAIL]` Directory ${OLD_BACKUP_DAY} exists but can not remove!" >> ${LOG_FILE}
+                echo " `change_color red [REMOVE][FAIL]` Directory ${OLD_BACKUP_DAY} exists but can not remove!" >> ${LOG_FILE}
             fi
         fi
     fi

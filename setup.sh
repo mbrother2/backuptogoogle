@@ -12,21 +12,28 @@ change_gdrive_config(){
 }
 
 # Download gdrive file
+echo "Downloading gdrive file from github..."
 curl -o ${GDRIVE_BIN} ${GITHUB_LINK}/gdrive_linux
 chmod 755 ${GDRIVE_BIN}
 
-# Download script cron
+# Download script cron file
+echo ""
+echo "Downloading script cron file from github..."
 curl -o ${CRON_BACKUP} ${GITHUB_LINK}/cron_backup.sh
 chmod 755 ${CRON_BACKUP}
 
 # Setup gdrive credential
+echo ""
+echo "Setting up gdrive credential..."
 gdrive about
 
 # Set up cron backup
+echo ""
+echo "Setting up cron backup..."
 echo $PATH >> /var/spool/cron/root
-read -p "Which directory do you want to upload to Google Drive?(default /backup): " BACKUP_DIR
-read -p "Which file do you want to get gdrive log?(default /var/log/gdrive.log): " LOG_FILE
-read -p "How many days you want to keep backup on Google Drive?(default 7): " DAY_REMOVE
+read -p " Which directory do you want to upload to Google Drive?(default /backup): " BACKUP_DIR
+read -p " Which file do you want to get gdrive log?(default /var/log/gdrive.log): " LOG_FILE
+read -p " How many days you want to keep backup on Google Drive?(default 7): " DAY_REMOVE
 
 change_gdrive_config BACKUP_DIR ${BACKUP_DIR}
 change_gdrive_config LOG_FILE ${LOG_FILE}

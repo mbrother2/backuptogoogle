@@ -70,8 +70,8 @@ run_upload(){
             fi
             write_time_log
             OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
-            UPLOAD_FILE=`gdrive upload -p ${ID_DIR} /backup/$i`
-            if [[ "${UPLOAD_FILE}" == *"Error"* ]]
+            UPLOAD_FILE=`gdrive upload -p ${ID_DIR} ${BACKUP_DIR}/$i`
+            if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
             then
                 echo " `change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}" >> ${LOG_FILE}
             else

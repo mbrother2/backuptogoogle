@@ -4,7 +4,20 @@
 GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
 GDRIVE_BIN="/usr/sbin/gdrive"
 CRON_BACKUP="/usr/sbin/cron_backup.sh"
-CRON_FILE="/var/spool/cron/root"
+
+# Detect OS
+detect_os(){
+    if [ -f /etc/redhat-release ]
+    then
+        CRON_FILE="/var/spool/cron/root"
+    elif [ -f /usr/bin/lsb_release ]
+    then
+        CRON_FILE="/var/spool/cron/crontabs/root"
+    else
+        echo "Sorry! We do not support your OS."
+        exit 1
+    fi
+}
 
 # Change backup config file
 change_backup_config(){
@@ -35,7 +48,6 @@ setup_credential(){
 setup_cron(){
     echo ""
     echo "Setting up cron backup..."
-    echo $PATH >> /var/spool/cron/root
     read -p " Which directory do you want to upload to Google Drive?(default /backup): " BACKUP_DIR
     read -p " Which file do you want to get gdrive log?(default /var/log/gdrive.log): " LOG_FILE
     read -p " How many days you want to keep backup on Google Drive?(default 7): " DAY_REMOVE
@@ -66,6 +78,7 @@ show_info(){
 }
 
 # Main functions
+detect_os
 download_file
 setup_credential
 setup_cron

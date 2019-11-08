@@ -4,6 +4,7 @@
 BACKUP_DIR="/backup"
 LOG_FILE="/var/log/gdrive.log"
 DAY_REMOVE="7"
+FIRST_OPTION=$1
 
 # Date variables
 TODAY=`date +"%d_%m_%Y"`
@@ -40,31 +41,37 @@ write_time_log(){
 check_info(){
     if [ ! -d "${BACKUP_DIR}" ]
     then
+        [[ "${FIRST_OPTION}" == "-v" ]] && echo `change_color red [CHECKS][FAIL]` " Directory ${BACKUP_DIR} do not exist"
         write_time_log   
-        echo `change_color red [CHECKS][FAIL]` " Directory ${BACKUP_DIR} do not exist" >> ${LOG_FILE}
+        echo "`change_color red [CHECKS][FAIL]` Directory ${BACKUP_DIR} do not exist" >> ${LOG_FILE}
         exit 1
     fi
 }
 
 # Run upload to Google Drive
 run_upload(){
+    [[ "${FIRST_OPTION}" == "-v" ]] && echo "Start upload to Google Drive..."
     for i in $(ls -1 ${BACKUP_DIR})
     do
         CHECK_BACKUP_DIR=`gdrive list -m 100000 --name-width 0 | grep -c "${TODAY}"`
         if [ ${CHECK_BACKUP_DIR} -eq 0 ]
         then
+            [[ "${FIRST_OPTION}" == "-v" ]] && echo "Directory ${TODAY} does not exist. Creating..."
             ID_DIR=`gdrive mkdir ${TODAY} | awk '{print $2}'`
         else
+            [[ "${FIRST_OPTION}" == "-v" ]] && echo "Directory ${TODAY} existed. Skipping..."
             ID_DIR=`gdrive list -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
         fi
         if [ ${#ID_DIR} -ne 33 ]
         then
+            [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color red [CREATE][FAIL]` Can not create directory ${TODAY}"
             write_time_log
             echo " `change_color red [CREATE][FAIL]` Can not create directory ${TODAY}" >> ${LOG_FILE}
             gdrive mkdir ${TODAY} 2>&1 | tee -a ${LOG_FILE}
         else
             if [ ${CHECK_BACKUP_DIR} -eq 0 ]
             then
+                [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color green [CREATE]` Create directory ${TODAY} with ID ${ID_DIR}"
                 write_time_log
                 echo " `change_color green [CREATE]` Create directory ${TODAY} with ID ${ID_DIR}" >> ${LOG_FILE}
             fi
@@ -73,8 +80,10 @@ run_upload(){
             UPLOAD_FILE=`gdrive upload -p ${ID_DIR} ${BACKUP_DIR}/$i`
             if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
             then
+                [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}"
                 echo " `change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}" >> ${LOG_FILE}
             else
+                [[ "${FIRST_OPTION}" == "-v" ]] && echo "`change_color green [UPLOAD]` Upload file /backup/$i to directory ${TODAY}"
                 echo " `change_color green [UPLOAD]` Upload file /backup/$i to directory ${TODAY}" >> ${LOG_FILE}
                 echo ${UPLOAD_FILE} >> ${LOG_FILE}
             fi
@@ -85,8 +94,10 @@ run_upload(){
                 OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
                 if [ "${OLD_BACKUP_ID}" == "" ]
                 then
+                    [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}"
                     echo " `change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}" >> ${LOG_FILE}
                 else
+                    [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color red [REMOVE][FAIL]` Directory ${OLD_BACKUP_DAY} exists but can not remove!"
                     echo " `change_color red [REMOVE][FAIL]` Directory ${OLD_BACKUP_DAY} exists but can not remove!" >> ${LOG_FILE}
                 fi
             fi

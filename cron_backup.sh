@@ -32,79 +32,79 @@ change_color(){
     esac
 }
 
-# Write time to log file
-write_time_log(){
-    echo -n `date "+[ %d/%m/%Y %H:%M:%S ]"` >> ${LOG_FILE}
+# Show processing and write log
+show_write_log(){
+    [[ "${FIRST_OPTION}" == "-v" ]] && echo `date "+[ %d/%m/%Y %H:%M:%S ]"` $1
+    echo `date "+[ %d/%m/%Y %H:%M:%S ]"` $1 >> ${LOG_FILE}
 }
+
 
 # Check infomations before upload to Google Drive
 check_info(){
+    show_write_log "---"
     if [ ! -d "${BACKUP_DIR}" ]
-    then
-        [[ "${FIRST_OPTION}" == "-v" ]] && echo `change_color red [CHECKS][FAIL]` " Directory ${BACKUP_DIR} do not exist"
-        write_time_log   
-        echo "`change_color red [CHECKS][FAIL]` Directory ${BACKUP_DIR} do not exist" >> ${LOG_FILE}
+    then       
+        show_write_log "`change_color red [CHECKS][FAIL]` Directory ${BACKUP_DIR} do not exist"
         exit 1
     fi
 }
 
 # Run upload to Google Drive
 run_upload(){
-    [[ "${FIRST_OPTION}" == "-v" ]] && echo "Start upload to Google Drive..."
+    show_write_log "Start upload to Google Drive..."
+    CHECK_BACKUP_DIR=`gdrive list -m 100000 --name-width 0 | grep -c "${TODAY}"`
+    if [ ${CHECK_BACKUP_DIR} -eq 0 ]
+    then
+        show_write_log "Directory ${TODAY} does not exist. Creating..."
+        ID_DIR=`gdrive mkdir ${TODAY} | awk '{print $2}'`
+    else
+        show_write_log "Directory ${TODAY} existed. Skipping..."
+        ID_DIR=`gdrive list -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
+    fi
+    if [ ${#ID_DIR} -ne 33 ]
+    then
+        show_write_log "`change_color red [CREATE][FAIL]` Can not create directory ${TODAY}"
+        exit 1
+    elif [ ${CHECK_BACKUP_DIR} -eq 0 ]
+    then
+        show_write_log "`change_color green [CREATE]` Created directory ${TODAY} with ID ${ID_DIR}"
+    else
+        :
+    fi
     for i in $(ls -1 ${BACKUP_DIR})
     do
-        CHECK_BACKUP_DIR=`gdrive list -m 100000 --name-width 0 | grep -c "${TODAY}"`
-        if [ ${CHECK_BACKUP_DIR} -eq 0 ]
+        show_write_log "Uploading file ${BACKUP_DIR}/$i to directory ${TODAY}..."                
+        UPLOAD_FILE=`gdrive upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
+        if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
         then
-            [[ "${FIRST_OPTION}" == "-v" ]] && echo "Directory ${TODAY} does not exist. Creating..."
-            ID_DIR=`gdrive mkdir ${TODAY} | awk '{print $2}'`
+            show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}"
+            show_write_log "Something wrong!!! Exit."
+            exit
         else
-            [[ "${FIRST_OPTION}" == "-v" ]] && echo "Directory ${TODAY} existed. Skipping..."
-            ID_DIR=`gdrive list -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
-        fi
-        if [ ${#ID_DIR} -ne 33 ]
-        then
-            [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color red [CREATE][FAIL]` Can not create directory ${TODAY}"
-            write_time_log
-            echo " `change_color red [CREATE][FAIL]` Can not create directory ${TODAY}" >> ${LOG_FILE}
-            gdrive mkdir ${TODAY} 2>&1 | tee -a ${LOG_FILE}
-        else
-            if [ ${CHECK_BACKUP_DIR} -eq 0 ]
-            then
-                [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color green [CREATE]` Create directory ${TODAY} with ID ${ID_DIR}"
-                write_time_log
-                echo " `change_color green [CREATE]` Create directory ${TODAY} with ID ${ID_DIR}" >> ${LOG_FILE}
-            fi
-            write_time_log
-            OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
-            UPLOAD_FILE=`gdrive upload -p ${ID_DIR} ${BACKUP_DIR}/$i`
-            if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
-            then
-                [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}"
-                echo " `change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}" >> ${LOG_FILE}
-            else
-                [[ "${FIRST_OPTION}" == "-v" ]] && echo "`change_color green [UPLOAD]` Upload file /backup/$i to directory ${TODAY}"
-                echo " `change_color green [UPLOAD]` Upload file /backup/$i to directory ${TODAY}" >> ${LOG_FILE}
-                echo ${UPLOAD_FILE} >> ${LOG_FILE}
-            fi
-            if [ "${OLD_BACKUP_ID}" != "" ]
-            then
-                write_time_log
-                gdrive delete -r ${OLD_BACKUP_ID}
-                OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
-                if [ "${OLD_BACKUP_ID}" == "" ]
-                then
-                    [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}"
-                    echo " `change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}" >> ${LOG_FILE}
-                else
-                    [[ "${FIRST_OPTION}" == "-v" ]] && echo " `change_color red [REMOVE][FAIL]` Directory ${OLD_BACKUP_DAY} exists but can not remove!"
-                    echo " `change_color red [REMOVE][FAIL]` Directory ${OLD_BACKUP_DAY} exists but can not remove!" >> ${LOG_FILE}
-                fi
-            fi
+            show_write_log "`change_color green [UPLOAD]` Uploaded file ${BACKUP_DIR}/$i to directory ${TODAY}"
         fi
     done
+    show_write_log "Finish! All files in ${BACKUP_DIR} are uploaded to Google Drive in directory ${TODAY}"
+}
+
+remove_old_dir(){
+    OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+    if [ "${OLD_BACKUP_ID}" != "" ]
+    then
+        gdrive delete -r ${OLD_BACKUP_ID}
+        OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+        if [ "${OLD_BACKUP_ID}" == "" ]
+        then
+            show_write_log "`change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}"
+        else
+            show_write_log "`change_color red [REMOVE][FAIL]` Directory ${OLD_BACKUP_DAY} exists but can not remove!"
+        fi
+    else
+        show_write_log "Directory ${OLD_BACKUP_DAY} does not exist. Nothing need remove!"
+    fi
 }
 
 # Main functions
 check_info
 run_upload
+remove_old_dir

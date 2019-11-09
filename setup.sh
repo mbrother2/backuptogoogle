@@ -28,6 +28,19 @@ change_color(){
     esac
 }
 
+check_md5sum(){
+    curl -o $2 ${GITHUB_LINK}/$1
+    ORIGIN_MD5=`curl -s ${GITHUB_LINK}/MD5SUM | grep $1 | awk '{print $1}'`
+    LOCAL_MD5=`md5sum $2 | awk '{print $1}'`
+    if [ "${ORIGIN_MD5}" == "${LOCAL_MD5}" ]
+    then
+        show_write_log "Check md5sum for file $1 successful"
+    else
+        show_write_log "`change_color red [CHECKS][FAIL]` Can not check md5sum for file $1. Exit!"
+        exit 1
+    fi
+}
+
 # Write log
 show_write_log(){
     echo "`date "+[ %d/%m/%Y %H:%M:%S ]"` $1" | tee -a ${LOG_FILE}
@@ -50,8 +63,7 @@ detect_os(){
     show_write_log "Checking OS..."
     if [ -f /etc/redhat-release ]
     then
-        CRON_FILE="/var/spool/cron/root"
-        
+        CRON_FILE="/var/spool/cron/root"        
     elif [ -f /usr/bin/lsb_release ]
     then
         CRON_FILE="/var/spool/cron/crontabs/root"
@@ -73,9 +85,9 @@ change_backup_config(){
 # Download file from Github
 download_file(){
     show_write_log "Downloading gdrive file from github..."
-    curl -o ${GDRIVE_BIN} ${GITHUB_LINK}/gdrive_linux
+    check_md5sum gdrive_linux "${GDRIVE_BIN}"
     show_write_log "Downloading script cron file from github..."
-    curl -o ${CRON_BACKUP} ${GITHUB_LINK}/cron_backup.sh
+    check_md5sum cron_backup.sh "${CRON_BACKUP}"
     chmod 755 ${GDRIVE_BIN} ${CRON_BACKUP}
 }
 
@@ -90,7 +102,11 @@ setup_cron(){
     show_write_log "Setting up cron backup..."
     read -p " Which directory do you want to upload to Google Drive?(default /backup): " BACKUP_DIR
     read -p " How many days you want to keep backup on Google Drive?(default 7): " DAY_REMOVE
-    
+    if [ ! -d ${BACKUP_DIR:-/backup} ]
+    then
+        show_write_log "`change_color red [WARNING]` Directory ${BACKUP_DIR:-/backup} does not exist! Ensure you will be create it after."
+        sleep 3
+    fi
     change_backup_config BACKUP_DIR ${BACKUP_DIR}
     change_backup_config LOG_FILE ${LOG_FILE}
     change_backup_config DAY_REMOVE ${DAY_REMOVE}

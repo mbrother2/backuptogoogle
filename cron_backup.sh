@@ -2,7 +2,7 @@
 
 # Setup variables
 BACKUP_DIR="/backup"
-LOG_FILE="/var/log/gdrive.log"
+LOG_FILE="/var/log/backuptogoogle.log"
 DAY_REMOVE="7"
 FIRST_OPTION=$1
 

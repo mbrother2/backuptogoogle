@@ -38,6 +38,19 @@ show_write_log(){
     echo `date "+[ %d/%m/%Y %H:%M:%S ]"` $1 >> ${LOG_FILE}
 }
 
+# Check file type
+check_file_type(){
+    if [ -d $1 ]
+    then
+        FILE_TYPE="directory"
+    elif [ -f $1 ]
+    then
+        FILE_TYPE="file"
+    else
+        show_write_log "`change_color red [CHECKS][FAIL]` Can not detect file type for $1. Exit"
+        exit 1
+    fi
+}
 
 # Check infomations before upload to Google Drive
 check_info(){
@@ -73,7 +86,8 @@ run_upload(){
     fi
     for i in $(ls -1 ${BACKUP_DIR})
     do
-        show_write_log "Uploading file ${BACKUP_DIR}/$i to directory ${TODAY}..."                
+        check_file_type "${BACKUP_DIR}/$i"            
+        show_write_log "Uploading ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}..."                
         UPLOAD_FILE=`gdrive upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
         if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
         then
@@ -81,10 +95,10 @@ run_upload(){
             show_write_log "Something wrong!!! Exit."
             exit
         else
-            show_write_log "`change_color green [UPLOAD]` Uploaded file ${BACKUP_DIR}/$i to directory ${TODAY}"
+            show_write_log "`change_color green [UPLOAD]` Uploaded ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}"
         fi
     done
-    show_write_log "Finish! All files in ${BACKUP_DIR} are uploaded to Google Drive in directory ${TODAY}"
+    show_write_log "Finish! All files and directories in ${BACKUP_DIR} are uploaded to Google Drive in directory ${TODAY}"
 }
 
 remove_old_dir(){

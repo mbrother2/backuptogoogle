@@ -57,8 +57,22 @@ check_info(){
     show_write_log "---"
     if [ ! -d "${BACKUP_DIR}" ]
     then       
-        show_write_log "`change_color red [CHECKS][FAIL]` Directory ${BACKUP_DIR} do not exist"
+        show_write_log "`change_color red [CHECKS][FAIL]` Directory ${BACKUP_DIR} does not exist. Exit"
         exit 1
+    fi
+    if [ ! -f /root/.gdrive/token_v2.json ]
+    then
+        show_write_log "`change_color red [CHECKS][FAIL]` File /root/.gdrive/token_v2.json does not exist. Exit"
+        show_write_log "Please run command: 'gdrive about' to create your Google token for gdrive"
+        exit 1
+    else
+        echo "\n" | gdrive list >/dev/null
+        if [ $? -ne 0 ]
+        then
+            show_write_log "`change_color red [CHECKS][FAIL]` File /root/.gdrive/token_v2.json exists but can not verify Google token for gdrive. Exit"
+            show_write_log "Please run command: 'gdrive about' to recreate your Google token for gdrive"
+            exit 1
+        fi
     fi
 }
 

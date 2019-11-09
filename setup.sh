@@ -124,6 +124,7 @@ show_info(){
     show_write_log "Keep backup: ${DAY_REMOVE:-7} days"
     show_write_log "---"
     show_write_log "Gdrive bin file : ${GDRIVE_BIN}"
+    show_write_log "Google token    : /root/.gdrive/token_v2.json"
     show_write_log "Cron backup file: ${CRON_BACKUP}"
     show_write_log "Cron backup     : 0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
     echo ""

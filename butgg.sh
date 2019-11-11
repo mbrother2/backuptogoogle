@@ -169,8 +169,8 @@ show_info(){
 _setup(){
     pre_setup
     echo "LOG_FILE=${DF_LOG_FILE}" > ${BUTGG_CONF}
-    echo "BACKUP_DIR=${DF_BACKUP_DIR}" > ${BUTGG_CONF}
-    echo "DAY_REMOVE=${DF_DAY_REMOVE}" > ${BUTGG_CONF}
+    echo "BACKUP_DIR=${DF_BACKUP_DIR}" >> ${BUTGG_CONF}
+    echo "DAY_REMOVE=${DF_DAY_REMOVE}" >> ${BUTGG_CONF}
     check_network
     detect_os
     download_file

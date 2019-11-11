@@ -123,7 +123,7 @@ setup_cron(){
         sleep 3
     fi
     crontab -l > ${HOME}/.gdrive/old_cron
-    CHECK_CRON=`cat ${CRON_FILE} | grep -c "cron_backup.sh"`
+    CHECK_CRON=`cat ${HOME}/.gdrive/old_cron | grep -c "cron_backup.sh"`
     if [ ${CHECK_CRON} -eq 0 ]
     then
         echo "PATH=$PATH" >> ${HOME}/.gdrive/old_cron
@@ -136,7 +136,7 @@ setup_cron(){
         else
             rm -f  ${HOME}/.gdrive/old_cron
             show_write_log "Setup cronjob to backup successful"
-            SHOW_CRON=="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
+            SHOW_CRON="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
         fi
     fi
 }
@@ -149,10 +149,12 @@ show_info(){
     show_write_log "Log file   : ${DF_LOG_FILE}"
     show_write_log "Keep backup: ${DAY_REMOVE} days"
     show_write_log "---"
+    show_write_log "butgg.sh file   : ${SETUP_FILE}"
+    show_write_log "Cron backup     : ${SHOW_CRON}"
     show_write_log "Gdrive bin file : ${GDRIVE_BIN}"
     show_write_log "Google token    : ${HOME}/.gdrive/token_v2.json"
     show_write_log "Cron backup file: ${CRON_BACKUP}"
-    show_write_log "Cron backup     : ${SHOW_CRON}"
+
     echo ""
     echo " If you get trouble when use backuptogoogle please go to following URLs:"
     echo " https://backuptogoogle.com"

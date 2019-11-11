@@ -58,7 +58,8 @@ pre_setup(){
     then
         echo "Can not write to ${HOME}/.gdrive/script. Exit"
         exit 1
-    fi    
+    fi
+    rm -f ${HOME}/.gdrive/script/test.txt
 }
 
 # Check network
@@ -121,19 +122,21 @@ setup_cron(){
         show_write_log "`change_color yellow [WARNING]` Directory ${BACKUP_DIR} does not exist! Ensure you will be create it after."
         sleep 3
     fi
-    echo "PATH=$PATH" >> ${CRON_FILE}
-    if [ $? -ne 0 ]
+    crontab -l > ${HOME}/.gdrive/old_cron
+    CHECK_CRON=`cat ${CRON_FILE} | grep -c "cron_backup.sh"`
+    if [ ${CHECK_CRON} -eq 0 ]
     then
-        show_write_log "Can not setup cronjob to backup! Please check file ${CRON_FILE}"
-        SHOW_CRON="`change_color yellow [WARNING]` Can not setup cronjob to backup"
-    else
-        CHECK_CRON=`cat ${CRON_FILE} | grep -c "cron_backup.sh"`
-        if [ ${CHECK_CRON} -eq 0 ]
+        echo "PATH=$PATH" >> ${HOME}/.gdrive/old_cron
+        echo "0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1" >> ${HOME}/.gdrive/old_cron
+        crontab ${HOME}/.gdrive/old_cron
+        if [ $? -ne 0 ]
         then
-            echo "0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1" >> ${CRON_FILE}
+            show_write_log "Can not setup cronjob to backup! Please check again"
+            SHOW_CRON="`change_color yellow [WARNING]` Can not setup cronjob to backup"
+        else
+            rm -f  ${HOME}/.gdrive/old_cron
             show_write_log "Setup cronjob to backup successful"
             SHOW_CRON=="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
-            systemctl restart crond
         fi
     fi
 }

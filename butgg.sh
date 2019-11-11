@@ -9,6 +9,7 @@ DF_DAY_REMOVE="7"
 GDRIVE_BIN="${HOME}/.gdrive/script/gdrive"
 CRON_BACKUP="${HOME}/.gdrive/script/cron_backup.sh"
 SETUP_FILE="${HOME}/.gdrive/script/butgg.sh"
+CRON_TEMP="${HOME}/.gdrive/old_cron"
 
 # Color variables
 GREEN='\e[32m'
@@ -122,19 +123,19 @@ setup_cron(){
         show_write_log "`change_color yellow [WARNING]` Directory ${BACKUP_DIR} does not exist! Ensure you will be create it after."
         sleep 3
     fi
-    crontab -l > ${HOME}/.gdrive/old_cron
-    CHECK_CRON=`cat ${HOME}/.gdrive/old_cron | grep -c "cron_backup.sh"`
+    crontab -l > ${CRON_TEMP}
+    CHECK_CRON=`cat ${CRON_TEMP} | grep -c "cron_backup.sh"`
     if [ ${CHECK_CRON} -eq 0 ]
     then
-        echo "PATH=$PATH" >> ${HOME}/.gdrive/old_cron
-        echo "0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1" >> ${HOME}/.gdrive/old_cron
-        crontab ${HOME}/.gdrive/old_cron
+        echo "PATH=$PATH" >> ${CRON_TEMP}
+        echo "0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1" >> ${CRON_TEMP}
+        crontab ${CRON_TEMP}
         if [ $? -ne 0 ]
         then
             show_write_log "Can not setup cronjob to backup! Please check again"
             SHOW_CRON="`change_color yellow [WARNING]` Can not setup cronjob to backup"
         else
-            rm -f  ${HOME}/.gdrive/old_cron
+            rm -f  ${CRON_TEMP}
             show_write_log "Setup cronjob to backup successful"
             SHOW_CRON="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
         fi

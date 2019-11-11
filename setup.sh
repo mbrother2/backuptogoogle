@@ -4,12 +4,11 @@
 GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
-DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
+DF_LOG_FILE="/root/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
 GDRIVE_BIN="${HOME}/.gdrive/script/gdrive"
 CRON_BACKUP="${HOME}/.gdrive/script/cron_backup.sh"
 SETUP_FILE="${HOME}/.gdrive/script/butgg.sh"
-CRON_TEMP="${HOME}/.gdrive/old_cron"
 
 # Color variables
 GREEN='\e[32m'
@@ -59,8 +58,7 @@ pre_setup(){
     then
         echo "Can not write to ${HOME}/.gdrive/script. Exit"
         exit 1
-    fi
-    rm -f ${HOME}/.gdrive/script/test.txt
+    fi    
 }
 
 # Check network
@@ -91,6 +89,19 @@ detect_os(){
     show_write_log "OS supported!"
 }
 
+# Change backup config file
+change_backup_config(){
+    if [ "$3" == "" ]
+    then
+        VAR=$1
+        eval "$VAR"="$2"
+    else
+        VAR=$1
+        eval "$VAR"="$3"
+    fi
+    sed -i "s#^$1=.*#$1=\"$2\"#g" ${BUTGG_CONF}
+}
+
 # Download file from Github
 download_file(){
     show_write_log "Downloading gdrive file from github..."
@@ -113,31 +124,26 @@ setup_cron(){
     show_write_log "Setting up cron backup..."
     read -p " Which directory do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
     read -p " How many days you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE    
-    [[ -z "${BACKUP_DIR}" ]] && BACKUP_DIR="${DF_BACKUP_DIR}"
-    [[ -z "${DAY_REMOVE}" ]] && DAY_REMOVE="${DF_DAY_REMOVE}"
-    echo "LOG_FILE=${DF_LOG_FILE}" > ${BUTGG_CONF}
-    echo "BACKUP_DIR=${BACKUP_DIR}" >> ${BUTGG_CONF}
-    echo "DAY_REMOVE=${DAY_REMOVE}" >> ${BUTGG_CONF}
+    change_backup_config BACKUP_DIR ${DF_BACKUP_DIR} ${BACKUP_DIR}
+    change_backup_config DAY_REMOVE ${DF_DAY_REMOVE} ${DAY_REMOVE}
     if [ ! -d ${BACKUP_DIR} ]
     then
         show_write_log "`change_color yellow [WARNING]` Directory ${BACKUP_DIR} does not exist! Ensure you will be create it after."
         sleep 3
     fi
-    crontab -l > ${CRON_TEMP}
-    CHECK_CRON=`cat ${CRON_TEMP} | grep -c "cron_backup.sh"`
-    if [ ${CHECK_CRON} -eq 0 ]
+    echo "PATH=$PATH" >> ${CRON_FILE}
+    if [ $? -ne 0 ]
     then
-        echo "PATH=$PATH" >> ${CRON_TEMP}
-        echo "0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1" >> ${CRON_TEMP}
-        crontab ${CRON_TEMP}
-        if [ $? -ne 0 ]
+        show_write_log "Can not setup cronjob to backup! Please check file ${CRON_FILE}"
+        SHOW_CRON="`change_color yellow [WARNING]` Can not setup cronjob to backup"
+    else
+        CHECK_CRON=`cat ${CRON_FILE} | grep -c "cron_backup.sh"`
+        if [ ${CHECK_CRON} -eq 0 ]
         then
-            show_write_log "Can not setup cronjob to backup! Please check again"
-            SHOW_CRON="`change_color yellow [WARNING]` Can not setup cronjob to backup"
-        else
-            rm -f  ${CRON_TEMP}
+            echo "0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1" >> ${CRON_FILE}
             show_write_log "Setup cronjob to backup successful"
-            SHOW_CRON="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
+            SHOW_CRON=="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
+            systemctl restart crond
         fi
     fi
 }
@@ -150,12 +156,10 @@ show_info(){
     show_write_log "Log file   : ${DF_LOG_FILE}"
     show_write_log "Keep backup: ${DAY_REMOVE} days"
     show_write_log "---"
-    show_write_log "butgg.sh file   : ${SETUP_FILE}"
-    show_write_log "Cron backup     : ${SHOW_CRON}"
     show_write_log "Gdrive bin file : ${GDRIVE_BIN}"
     show_write_log "Google token    : ${HOME}/.gdrive/token_v2.json"
     show_write_log "Cron backup file: ${CRON_BACKUP}"
-
+    show_write_log "Cron backup     : ${SHOW_CRON}"
     echo ""
     echo " If you get trouble when use backuptogoogle please go to following URLs:"
     echo " https://backuptogoogle.com"

@@ -99,7 +99,7 @@ change_backup_config(){
         VAR=$1
         eval "$VAR"="$3"
     fi
-    sed -i "s#^$1=.*#$1=\"$2\"#g" ${BUTGG_CONF}
+    sed -i "s#^$1=.*#$1=\"$VAR\"#g" ${BUTGG_CONF}
 }
 
 # Download file from Github

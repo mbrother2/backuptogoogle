@@ -89,19 +89,6 @@ detect_os(){
     show_write_log "OS supported!"
 }
 
-# Change backup config file
-change_backup_config(){
-    if [ "$3" == "" ]
-    then
-        VAR=$1
-        eval "$VAR"="$2"
-    else
-        VAR=$1
-        eval "$VAR"="$3"
-    fi
-    sed -i "s#^$1=.*#$1=\"$VAR\"#g" ${BUTGG_CONF}
-}
-
 # Download file from Github
 download_file(){
     show_write_log "Downloading gdrive file from github..."
@@ -124,8 +111,11 @@ setup_cron(){
     show_write_log "Setting up cron backup..."
     read -p " Which directory do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
     read -p " How many days you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE    
-    change_backup_config BACKUP_DIR ${DF_BACKUP_DIR} ${BACKUP_DIR}
-    change_backup_config DAY_REMOVE ${DF_DAY_REMOVE} ${DAY_REMOVE}
+    [[ -z "${BACKUP_DIR}" ]] && BACKUP_DIR="${DF_BACKUP_DIR}"
+    [[ -z "${DAY_REMOVE}" ]] && DAY_REMOVE="${DF_DAY_REMOVE}"
+    echo "LOG_FILE=${DF_LOG_FILE}" > ${BUTGG_CONF}
+    echo "BACKUP_DIR=${DF_BACKUP_DIR}" >> ${BUTGG_CONF}
+    echo "DAY_REMOVE=${DF_DAY_REMOVE}" >> ${BUTGG_CONF}
     if [ ! -d ${BACKUP_DIR} ]
     then
         show_write_log "`change_color yellow [WARNING]` Directory ${BACKUP_DIR} does not exist! Ensure you will be create it after."
@@ -168,9 +158,6 @@ show_info(){
 
 _setup(){
     pre_setup
-    echo "LOG_FILE=${DF_LOG_FILE}" > ${BUTGG_CONF}
-    echo "BACKUP_DIR=${DF_BACKUP_DIR}" >> ${BUTGG_CONF}
-    echo "DAY_REMOVE=${DF_DAY_REMOVE}" >> ${BUTGG_CONF}
     check_network
     detect_os
     download_file

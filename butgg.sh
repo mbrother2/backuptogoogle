@@ -2,6 +2,7 @@
 
 # Set variables
 GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
+BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="/root/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
@@ -98,7 +99,7 @@ change_backup_config(){
         VAR=$1
         eval "$VAR"="$3"
     fi
-    sed -i "s#^$1=.*#$1=\"$2\"#g" ${CRON_BACKUP}
+    sed -i "s#^$1=.*#$1=\"$2\"#g" ${BUTGG_CONF}
 }
 
 # Download file from Github

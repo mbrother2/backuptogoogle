@@ -4,7 +4,7 @@
 GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
-DF_LOG_FILE="/root/.gdrive/butgg.log"
+DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
 GDRIVE_BIN="${HOME}/.gdrive/script/gdrive"
 CRON_BACKUP="${HOME}/.gdrive/script/cron_backup.sh"
@@ -168,6 +168,9 @@ show_info(){
 
 _setup(){
     pre_setup
+    echo "LOG_FILE=${DF_LOG_FILE}" > ${BUTGG_CONF}
+    echo "BACKUP_DIR=${DF_BACKUP_DIR}" > ${BUTGG_CONF}
+    echo "DAY_REMOVE=${DF_DAY_REMOVE}" > ${BUTGG_CONF}
     check_network
     detect_os
     download_file

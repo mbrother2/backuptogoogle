@@ -114,8 +114,8 @@ setup_cron(){
     [[ -z "${BACKUP_DIR}" ]] && BACKUP_DIR="${DF_BACKUP_DIR}"
     [[ -z "${DAY_REMOVE}" ]] && DAY_REMOVE="${DF_DAY_REMOVE}"
     echo "LOG_FILE=${DF_LOG_FILE}" > ${BUTGG_CONF}
-    echo "BACKUP_DIR=${DF_BACKUP_DIR}" >> ${BUTGG_CONF}
-    echo "DAY_REMOVE=${DF_DAY_REMOVE}" >> ${BUTGG_CONF}
+    echo "BACKUP_DIR=${BACKUP_DIR}" >> ${BUTGG_CONF}
+    echo "DAY_REMOVE=${DAY_REMOVE}" >> ${BUTGG_CONF}
     if [ ! -d ${BACKUP_DIR} ]
     then
         show_write_log "`change_color yellow [WARNING]` Directory ${BACKUP_DIR} does not exist! Ensure you will be create it after."

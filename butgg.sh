@@ -66,7 +66,7 @@ create_dir(){
 # Prepare setup
 pre_setup(){
     create_dir bin
-    create_dir gdrive
+    create_dir .gdrive
 }
 
 # Check network

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Setup variables
+BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"

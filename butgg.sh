@@ -6,9 +6,9 @@ BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
-GDRIVE_BIN="${HOME}/.gdrive/script/gdrive"
-CRON_BACKUP="${HOME}/.gdrive/script/cron_backup.sh"
-SETUP_FILE="${HOME}/.gdrive/script/butgg.sh"
+GDRIVE_BIN="${HOME}/bin/gdrive"
+CRON_BACKUP="${HOME}/bin/cron_backup.sh"
+SETUP_FILE="${HOME}/bin/butgg.sh"
 CRON_TEMP="${HOME}/.gdrive/old_cron"
 
 # Color variables
@@ -48,19 +48,19 @@ show_write_log(){
 
 # Prepare setup
 pre_setup(){
-    [[ ! -d ${HOME}/.gdrive/script ]] && mkdir -p ${HOME}/.gdrive/script
-    if [ ! -d ${HOME}/.gdrive/script ]
+    [[ ! -d ${HOME}/bin ]] && mkdir -p ${HOME}/bin
+    if [ ! -d ${HOME}/bin ]
     then
-        echo "Can not create directory ${HOME}/.gdrive/script. Exit"
+        echo "Can not create directory ${HOME}/bin. Exit"
         exit 1
     fi
-    echo 1 >> ${HOME}/.gdrive/script/test.txt
+    echo 1 >> ${HOME}/bin/test.txt
     if [ $? -ne 0 ]
     then
-        echo "Can not write to ${HOME}/.gdrive/script. Exit"
+        echo "Can not write to ${HOME}/bin. Exit"
         exit 1
     fi
-    rm -f ${HOME}/.gdrive/script/test.txt
+    rm -f ${HOME}/bin/test.txt
 }
 
 # Check network
@@ -105,7 +105,7 @@ download_file(){
 # Setup gdrive credential
 setup_credential(){
     show_write_log "Setting up gdrive credential..."
-    sh ${GDRIVE_BIN} about
+    gdrive about
 }
 
 # Set up cron backup
@@ -190,7 +190,7 @@ _uninstall(){
 _help(){
     echo "butgg.sh - Backup to Google Drive solution"
     echo ""
-    echo "Usage: sh $0 [options]"
+    echo "Usage: $0 [options]"
     echo ""
     echo "Options:"
     echo "  --help      show this help message and exit"
@@ -205,5 +205,5 @@ case $1 in
     --setup)     _setup ;;
     --update)    _update ;;
     --uninstall) _uninstall ;;
-    *)           echo "No such command: $1. Please use sh $0 --help" ;;
+    *)           echo "No such command: $1. Please use $0 --help" ;;
 esac

@@ -70,7 +70,7 @@ check_network(){
     then
         show_write_log "Network OK!"
     else
-        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network"
+        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
         exit 1
     fi
 }
@@ -85,7 +85,7 @@ detect_os(){
     then
         CRON_FILE="/var/spool/cron/crontabs/${USER}"
     else
-        show_write_log "Sorry! We do not support your OS."
+        show_write_log "Sorry! We do not support your OS. Exit"
         exit 1
     fi
     show_write_log "OS supported!"
@@ -151,10 +151,10 @@ show_info(){
     show_write_log "Keep backup: ${DAY_REMOVE} days"
     show_write_log "---"
     show_write_log "butgg.sh file   : ${SETUP_FILE}"
-    show_write_log "Cron backup     : ${SHOW_CRON}"
-    show_write_log "Gdrive bin file : ${GDRIVE_BIN}"
-    show_write_log "Google token    : ${HOME}/.gdrive/token_v2.json"
     show_write_log "Cron backup file: ${CRON_BACKUP}"
+    show_write_log "Gdrive bin file : ${GDRIVE_BIN}"
+    show_write_log "Cron backup     : ${SHOW_CRON}"
+    show_write_log "Google token    : ${HOME}/.gdrive/token_v2.json"
 
     echo ""
     echo " If you get trouble when use backuptogoogle please go to following URLs:"

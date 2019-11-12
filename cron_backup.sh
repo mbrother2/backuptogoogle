@@ -1,8 +1,6 @@
 #!/bin/bash
 
 # Setup variables
-BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
-GDRIVE_BIN="${HOME}/.gdrive/script/gdrive"
 DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
@@ -91,15 +89,15 @@ check_info(){
     if [ ! -f ${HOME}/.gdrive/token_v2.json ]
     then
         show_write_log "`change_color red [CHECKS][FAIL]` File ${HOME}/.gdrive/token_v2.json does not exist. Exit"
-        show_write_log "Please run command: \"sh ${GDRIVE_BIN} about\" to create your Google token for gdrive"
+        show_write_log "Please run command: 'gdrive about' to create your Google token for gdrive"
         exit 1
     else
-        echo "\n" | sh ${GDRIVE_BIN} list >/dev/null
+        echo "\n" | gdrive list >/dev/null
         if [ $? -ne 0 ]
         then
             echo ""
             show_write_log "`change_color red [CHECKS][FAIL]` File ${HOME}/.gdrive/token_v2.json exists but can not verify Google token for gdrive. Exit"
-            show_write_log "Please run command: \"sh ${GDRIVE_BIN} about\" to recreate your Google token for gdrive"
+            show_write_log "Please run command: 'gdrive about' to recreate your Google token for gdrive"
             exit 1
         fi
     fi
@@ -108,14 +106,14 @@ check_info(){
 # Run upload to Google Drive
 run_upload(){
     show_write_log "Start upload to Google Drive..."
-    CHECK_BACKUP_DIR=`sh ${GDRIVE_BIN} list -m 100000 --name-width 0 | grep -c "${TODAY}"`
+    CHECK_BACKUP_DIR=`gdrive list -m 100000 --name-width 0 | grep -c "${TODAY}"`
     if [ ${CHECK_BACKUP_DIR} -eq 0 ]
     then
         show_write_log "Directory ${TODAY} does not exist. Creating..."
-        ID_DIR=`sh ${GDRIVE_BIN} mkdir ${TODAY} | awk '{print $2}'`
+        ID_DIR=`gdrive mkdir ${TODAY} | awk '{print $2}'`
     else
         show_write_log "Directory ${TODAY} existed. Skipping..."
-        ID_DIR=`sh ${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
+        ID_DIR=`gdrive list -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
     fi
     if [ ${#ID_DIR} -ne 33 ]
     then
@@ -132,7 +130,7 @@ run_upload(){
     do
         check_file_type "${BACKUP_DIR}/$i"            
         show_write_log "Uploading ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}..."                
-        UPLOAD_FILE=`sh ${GDRIVE_BIN} upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
+        UPLOAD_FILE=`gdrive upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
         if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
         then
             show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}"
@@ -147,11 +145,11 @@ run_upload(){
 
 remove_old_dir(){
     OLD_BACKUP_DAY=`date +%d_%m_%Y -d "-${DAY_REMOVE} day"`
-    OLD_BACKUP_ID=`sh ${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+    OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
     if [ "${OLD_BACKUP_ID}" != "" ]
     then
-        sh ${GDRIVE_BIN} delete -r ${OLD_BACKUP_ID}
-        OLD_BACKUP_ID=`sh ${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+        gdrive delete -r ${OLD_BACKUP_ID}
+        OLD_BACKUP_ID=`gdrive list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
         if [ "${OLD_BACKUP_ID}" == "" ]
         then
             show_write_log "`change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}"

@@ -46,21 +46,27 @@ show_write_log(){
     echo "`date "+[ %d/%m/%Y %H:%M:%S ]"` $1" | tee -a ${DF_LOG_FILE}
 }
 
-# Prepare setup
-pre_setup(){
-    [[ ! -d ${HOME}/bin ]] && mkdir -p ${HOME}/bin
-    if [ ! -d ${HOME}/bin ]
+# Create necessary directory
+create_dir(){
+    [[ ! -d ${HOME}/$1 ]] && mkdir -p ${HOME}/$1
+    if [ ! -d ${HOME}/$1 ]
     then
-        echo "Can not create directory ${HOME}/bin. Exit"
+        echo "Can not create directory ${HOME}/$1. Exit"
         exit 1
     fi
-    echo 1 >> ${HOME}/bin/test.txt
+    echo 1 >> ${HOME}/$1/test.txt
     if [ $? -ne 0 ]
     then
-        echo "Can not write to ${HOME}/bin. Exit"
+        echo "Can not write to ${HOME}/$1. Exit"
         exit 1
     fi
-    rm -f ${HOME}/bin/test.txt
+    rm -f ${HOME}/$1/test.txt
+}
+
+# Prepare setup
+pre_setup(){
+    create_dir bin
+    create_dir gdrive
 }
 
 # Check network

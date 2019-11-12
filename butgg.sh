@@ -105,7 +105,7 @@ download_file(){
 # Setup gdrive credential
 setup_credential(){
     show_write_log "Setting up gdrive credential..."
-    gdrive about
+    sh ${GDRIVE_BIN} about
 }
 
 # Set up cron backup
@@ -190,7 +190,7 @@ _uninstall(){
 _help(){
     echo "butgg.sh - Backup to Google Drive solution"
     echo ""
-    echo "Usage: $0 [options]"
+    echo "Usage: sh $0 [options]"
     echo ""
     echo "Options:"
     echo "  --help      show this help message and exit"
@@ -205,5 +205,5 @@ case $1 in
     --setup)     _setup ;;
     --update)    _update ;;
     --uninstall) _uninstall ;;
-    *)           echo "No such command: $1. Please use $0 --help" ;;
+    *)           echo "No such command: $1. Please use sh $0 --help" ;;
 esac

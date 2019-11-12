@@ -198,7 +198,7 @@ _uninstall(){
 _help(){
     echo "butgg.sh - Backup to Google Drive solution"
     echo ""
-    echo "Usage: $0 [options]"
+    echo "Usage: butgg.sh [options]"
     echo ""
     echo "Options:"
     echo "  --help      show this help message and exit"
@@ -213,5 +213,5 @@ case $1 in
     --setup)     _setup ;;
     --update)    _update ;;
     --uninstall) _uninstall ;;
-    *)           echo "No such command: $1. Please use $0 --help" ;;
+    *)           echo "No such command: $1. Please use butgg.sh --help" ;;
 esac

@@ -141,11 +141,13 @@ setup_cron(){
             show_write_log "Can not setup cronjob to backup! Please check again"
             SHOW_CRON="`change_color yellow [WARNING]` Can not setup cronjob to backup"
         else
-            rm -f  ${CRON_TEMP}
             show_write_log "Setup cronjob to backup successful"
             SHOW_CRON="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
         fi
+    else
+        SHOW_CRON=`cat ${CRON_TEMP} | grep "cron_backup.sh"`
     fi
+    rm -f  ${CRON_TEMP}
 }
 
 show_info(){

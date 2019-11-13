@@ -137,12 +137,18 @@ download_file(){
 
 # Build GDRIVE_BIN
 build_gdrive(){
-    [[ "${SECOND_OPTION}" == "--no-build" ]] && return 0
+    [[ "${SECOND_OPTION}" == "no-build" ]] && return 0
     which git
     if [ $? -ne 0 ]
     then
-        echo "Command git not found. Please check again. Exit"
-        exit 1
+        echo "Command git not found. Trying to install git..."
+        yum -y install git
+        which git
+        if [ $? -ne 0 ]
+        then
+            echo "Command git not found. Please install git first."
+            exit 1
+        fi
     fi
     cd $HOME/.gdrive
     show_write_log "Downloading go from Google..."
@@ -152,6 +158,8 @@ build_gdrive(){
     show_write_log "Cloning gdrive project from Github..."
     git clone https://github.com/gdrive-org/gdrive.git
     show_write_log "Build your own gdrive!"
+    echo "Please go to URL to create your own Google credential:"
+    echo "https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step"
     read -p " Your Google API client_id: " gg_client_id
     read -p " Your Google API client_secret: " gg_client_secret
     sed -i "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" $HOME/.gdrive/gdrive/handlers_drive.go
@@ -224,9 +232,8 @@ show_info(){
     show_write_log "+-----"
 
     echo ""
-    echo " If you get trouble when use backuptogoogle please go to following URLs:"
-    echo " https://backuptogoogle.com"
-    echo " https://github.com/mbrother2/backuptogoogle"
+    echo " If you get trouble when use backuptogoogle please report here:"
+    echo " https://github.com/mbrother2/backuptogoogle/issues"
 }
 
 _setup(){
@@ -260,13 +267,14 @@ _uninstall(){
 _help(){
     echo "butgg.sh - Backup to Google Drive solution"
     echo ""
-    echo "Usage: butgg.sh [options]"
+    echo "Usage: butgg.sh [options] [command]"
     echo ""
     echo "Options:"
     echo "  --help      show this help message and exit"
     echo "  --setup     setup or reset all scripts & config file"
+    echo "    no-build  setup or reset all scripts & config file without build gdrive"
     echo "  --update    update to latest version"
-    echo "  --uninstall uninstall butgg.sh"
+    echo "  --uninstall remove all butgg scripts and .gdrive directory"
 }
 
 # Main functions

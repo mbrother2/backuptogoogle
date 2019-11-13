@@ -5,6 +5,18 @@
 - Auto remove old backup on Google Drive
 - Run upload from to Google Drive whenever you want
 - Detail log
+# Structure
+```
+$HOME/$USER
+         ├── bin
+         │    ├── butgg.sh
+         │    ├── cron_backup.sh
+         │    └── gdrive
+         └── .gdrive
+              ├── butgg.conf
+              ├── butgg.log
+              └── token_v2.json
+```
 # OS support(x86_64):
 - CentOS
 - Debian

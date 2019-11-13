@@ -1,6 +1,11 @@
 # backuptogoogle
-Upload solution to Google Drive
 ---
+# What script can do?
+- Complie gdrive on your server with your Google credential
+- Create cron auto backup
+- Auto remove old backup on Google Drive
+- Run upload from to Google Drive whenever you want
+- Detail log
 # OS support(x86_64):
 - CentOS
 - Debian
@@ -49,3 +54,12 @@ Update to latest version
 butgg.sh --uninstall
 ```
 Remove all butgg scripts and .gdrive directory
+###### 5. Run upload to Google Drive immediately
+```
+cron_backup.sh
+```
+Run upload to Google Drive immediately without show log
+```
+cron_backup.sh -v
+```
+Run upload to Google Drive immediately with show log detail

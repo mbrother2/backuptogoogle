@@ -2,6 +2,7 @@
 
 # Set variables
 GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
+GO_FILE="go1.12.5.linux-amd64"
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
@@ -65,6 +66,12 @@ create_dir(){
 
 # Prepare setup
 pre_setup(){
+    which git
+    if [ $? -ne 0 ]
+    then
+        echo "Command git not found. Please check again. Exit"
+        exit 1
+    fi
     create_dir bin
     create_dir .gdrive
 }
@@ -74,7 +81,14 @@ check_network(){
     show_write_log "Cheking network..."
     if ping -c 1 -w 1 raw.githubusercontent.com > /dev/null
     then
-        show_write_log "Network OK!"
+        show_write_log "Connect Github successful"
+    else
+        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
+        exit 1
+    fi
+    if ping -c 1 -w 1 dl.google.com > /dev/null
+    then
+        show_write_log "Connect Google successful"
     else
         show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
         exit 1
@@ -108,26 +122,27 @@ download_file(){
 
 # Build GDRIVE_BIN
 build_gdrive(){
-    cd ${HOME}/.gdrive
+    cd $HOME/.gdrive
     show_write_log "Downloading go from Google..."
-    curl -o go1.12.5.linux-amd64.tar.gz https://dl.google.com/go/go1.12.5.linux-amd64.tar.gz
+    curl -o ${GO_FILE}.tar.gz https://dl.google.com/go/${GO_FILE}.tar.gz
     show_write_log "Extracting go lang..."
-    tar -xf go1.12.5.linux-amd64.tar.gz
+    tar -xf ${GO_FILE}.tar.gz
     show_write_log "Cloning gdrive project from Github..."
     git clone https://github.com/gdrive-org/gdrive.git
     show_write_log "Build your own gdrive!"
     read -p " Your Google API client_id: " gg_client_id
     read -p " Your Google API client_secret: " gg_client_secret
-    sed -i "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" ${HOME}/.gdrive/gdrive/handlers_drive.go
-    sed -i "s#^const ClientSecret =.*#const ClientSecret = \"${gg_client_secret}\"#g" ${HOME}/.gdrive/gdrive/handlers_drive.go
+    sed -i "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" $HOME/.gdrive/gdrive/handlers_drive.go
+    sed -i "s#^const ClientSecret =.*#const ClientSecret = \"${gg_client_secret}\"#g" $HOME/.gdrive/gdrive/handlers_drive.go
     show_write_log "Building gdrive..."
-    cd ${HOME}/.gdrive/gdrive
-    ${HOME}/.gdrive/go/bin/go get github.com/prasmussen/gdrive
-    ${HOME}/.gdrive/go/bin/go build -ldflags '-w -s'
-    mv ${HOME}/.gdrive/gdrive/gdrive ${HOME}/bin/gdrive
-    chmod 755 ${HOME}/.gdrive/gdrive
-    rm -rf ${HOME}/.gdrive/go
-    rm -rf ${HOME}/.gdrive/gdrive
+    cd $HOME/.gdrive/gdrive
+    $HOME/.gdrive/go/bin/go get github.com/prasmussen/gdrive
+    $HOME/.gdrive/go/bin/go build -ldflags '-w -s'
+    mv $HOME/.gdrive/gdrive/gdrive $HOME/bin/gdrive
+    chmod 755 $HOME/.gdrive/gdrive
+    rm -f $HOME/.gdrive/${GO_FILE}.tar.gz
+    rm -rf $HOME/.gdrive/go
+    rm -rf $HOME/.gdrive/gdrive
 }
 
 # Setup gdrive credential

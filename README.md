@@ -1,6 +1,6 @@
 # backuptogoogle
 # What script can do?
-- Complie gdrive on your server with your Google credential
+- Complie gdrive (https://github.com/gdrive-org/gdrive) on your server with your Google credential
 - Create cron auto backup
 - Auto remove old backup on Google Drive
 - Run upload from to Google Drive whenever you want

@@ -1,5 +1,5 @@
 # backuptogoogle
-# What script can do?
+# What can this script do?
 - Complie gdrive (https://github.com/gdrive-org/gdrive) on your server with your Google credential
 - Create cron auto backup
 - Auto remove old backup on Google Drive

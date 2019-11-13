@@ -121,6 +121,7 @@ build_gdrive(){
     sed -i "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" ${HOME}/.gdrive/gdrive/handlers_drive.go
     sed -i "s#^const ClientSecret =.*#const ClientSecret = \"${gg_client_secret}\"#g" ${HOME}/.gdrive/gdrive/handlers_drive.go
     show_write_log "Building gdrive..."
+    cd ${HOME}/.gdrive/gdrive
     ${HOME}/.gdrive/go/bin/go get github.com/prasmussen/gdrive
     ${HOME}/.gdrive/go/bin/go build -ldflags '-w -s'
     mv ${HOME}/.gdrive/gdrive/gdrive ${HOME}/bin/gdrive

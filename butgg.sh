@@ -4,11 +4,12 @@
 GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
-DF_LOG_FILE="/root/.gdrive/butgg.log"
+DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
-GDRIVE_BIN="${HOME}/.gdrive/script/gdrive"
-CRON_BACKUP="${HOME}/.gdrive/script/cron_backup.sh"
-SETUP_FILE="${HOME}/.gdrive/script/butgg.sh"
+GDRIVE_BIN="${HOME}/bin/gdrive"
+CRON_BACKUP="${HOME}/bin/cron_backup.sh"
+SETUP_FILE="${HOME}/bin/butgg.sh"
+CRON_TEMP="${HOME}/.gdrive/old_cron"
 
 # Color variables
 GREEN='\e[32m'
@@ -45,26 +46,27 @@ show_write_log(){
     echo "`date "+[ %d/%m/%Y %H:%M:%S ]"` $1" | tee -a ${DF_LOG_FILE}
 }
 
+# Create necessary directory
+create_dir(){
+    [[ ! -d ${HOME}/$1 ]] && mkdir -p ${HOME}/$1
+    if [ ! -d ${HOME}/$1 ]
+    then
+        echo "Can not create directory ${HOME}/$1. Exit"
+        exit 1
+    fi
+    echo 1 >> ${HOME}/$1/test.txt
+    if [ $? -ne 0 ]
+    then
+        echo "Can not write to ${HOME}/$1. Exit"
+        exit 1
+    fi
+    rm -f ${HOME}/$1/test.txt
+}
+
 # Prepare setup
 pre_setup(){
-    [[ ! -d ${HOME}/.gdrive/script ]] && mkdir -p ${HOME}/.gdrive/script
-    if [ ! -d ${HOME}/.gdrive/script ]
-    then
-        echo "Can not create directory ${HOME}/.gdrive/script. Exit"
-        exit 1
-    fi
-    echo 1 >> ${HOME}/.gdrive/script/test.txt
-    if [ $? -ne 0 ]
-    then
-        echo "Can not write to ${HOME}/.gdrive/script. Exit"
-        exit 1
-    fi
-    which git
-    if [ $? -ne 0 ]
-    then
-        echo "Can not find git command. Please check again. Exit"
-        exit 1
-    fi
+    create_dir bin
+    create_dir .gdrive
 }
 
 # Check network
@@ -72,16 +74,9 @@ check_network(){
     show_write_log "Cheking network..."
     if ping -c 1 -w 1 raw.githubusercontent.com > /dev/null
     then
-        show_write_log "Connect Github successful!"
+        show_write_log "Network OK!"
     else
-        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network"
-        exit 1
-    fi
-    if ping -c 1 -w 1 dl.google.com > /dev/null
-    then
-        show_write_log "Connect Google successful!"
-    else
-        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Google, please check your network"
+        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
         exit 1
     fi
 }
@@ -96,23 +91,19 @@ detect_os(){
     then
         CRON_FILE="/var/spool/cron/crontabs/${USER}"
     else
-        show_write_log "Sorry! We do not support your OS."
+        show_write_log "Sorry! We do not support your OS. Exit"
         exit 1
     fi
     show_write_log "OS supported!"
 }
 
-# Change backup config file
-change_backup_config(){
-    if [ "$3" == "" ]
-    then
-        VAR=$1
-        eval "$VAR"="$2"
-    else
-        VAR=$1
-        eval "$VAR"="$3"
-    fi
-    sed -i "s#^$1=.*#$1=\"$2\"#g" ${BUTGG_CONF}
+# Download file from Github
+download_file(){
+    show_write_log "Downloading script cron file from github..."
+    check_md5sum cron_backup.sh "${CRON_BACKUP}"
+    show_write_log "Downloading setup file from github..."
+    check_md5sum butgg.sh "${SETUP_FILE}"
+    chmod 755 ${CRON_BACKUP} ${SETUP_FILE}
 }
 
 # Build GDRIVE_BIN
@@ -138,16 +129,6 @@ build_gdrive(){
     rm -rf ${HOME}/.gdrive/script/gdrive
 }
 
-
-# Download file from Github
-download_file(){
-    show_write_log "Downloading script cron file from github..."
-    check_md5sum cron_backup.sh "${CRON_BACKUP}"
-    show_write_log "Downloading setup file from github..."
-    check_md5sum butgg.sh "${SETUP_FILE}"
-    chmod 755 ${GDRIVE_BIN} ${CRON_BACKUP} ${SETUP_FILE}
-}
-
 # Setup gdrive credential
 setup_credential(){
     show_write_log "Setting up gdrive credential..."
@@ -159,28 +140,35 @@ setup_cron(){
     show_write_log "Setting up cron backup..."
     read -p " Which directory do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
     read -p " How many days you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE    
-    change_backup_config BACKUP_DIR ${DF_BACKUP_DIR} ${BACKUP_DIR}
-    change_backup_config DAY_REMOVE ${DF_DAY_REMOVE} ${DAY_REMOVE}
+    [[ -z "${BACKUP_DIR}" ]] && BACKUP_DIR="${DF_BACKUP_DIR}"
+    [[ -z "${DAY_REMOVE}" ]] && DAY_REMOVE="${DF_DAY_REMOVE}"
+    echo "LOG_FILE=${DF_LOG_FILE}" > ${BUTGG_CONF}
+    echo "BACKUP_DIR=${BACKUP_DIR}" >> ${BUTGG_CONF}
+    echo "DAY_REMOVE=${DAY_REMOVE}" >> ${BUTGG_CONF}
     if [ ! -d ${BACKUP_DIR} ]
     then
         show_write_log "`change_color yellow [WARNING]` Directory ${BACKUP_DIR} does not exist! Ensure you will be create it after."
         sleep 3
     fi
-    echo "PATH=$PATH" >> ${CRON_FILE}
-    if [ $? -ne 0 ]
+    crontab -l > ${CRON_TEMP}
+    CHECK_CRON=`cat ${CRON_TEMP} | grep -c "cron_backup.sh"`
+    if [ ${CHECK_CRON} -eq 0 ]
     then
-        show_write_log "Can not setup cronjob to backup! Please check file ${CRON_FILE}"
-        SHOW_CRON="`change_color yellow [WARNING]` Can not setup cronjob to backup"
-    else
-        CHECK_CRON=`cat ${CRON_FILE} | grep -c "cron_backup.sh"`
-        if [ ${CHECK_CRON} -eq 0 ]
+        echo "PATH=$PATH" >> ${CRON_TEMP}
+        echo "0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1" >> ${CRON_TEMP}
+        crontab ${CRON_TEMP}
+        if [ $? -ne 0 ]
         then
-            echo "0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1" >> ${CRON_FILE}
+            show_write_log "Can not setup cronjob to backup! Please check again"
+            SHOW_CRON="`change_color yellow [WARNING]` Can not setup cronjob to backup"
+        else
             show_write_log "Setup cronjob to backup successful"
-            SHOW_CRON=="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
-            systemctl restart crond
+            SHOW_CRON="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
         fi
+    else
+        SHOW_CRON=`cat ${CRON_TEMP} | grep "cron_backup.sh"`
     fi
+    rm -f  ${CRON_TEMP}
 }
 
 show_info(){
@@ -191,10 +179,12 @@ show_info(){
     show_write_log "Log file   : ${DF_LOG_FILE}"
     show_write_log "Keep backup: ${DAY_REMOVE} days"
     show_write_log "---"
-    show_write_log "Gdrive bin file : ${GDRIVE_BIN}"
-    show_write_log "Google token    : ${HOME}/.gdrive/token_v2.json"
+    show_write_log "butgg.sh file   : ${SETUP_FILE}"
     show_write_log "Cron backup file: ${CRON_BACKUP}"
+    show_write_log "Gdrive bin file : ${GDRIVE_BIN}"
     show_write_log "Cron backup     : ${SHOW_CRON}"
+    show_write_log "Google token    : ${HOME}/.gdrive/token_v2.json"
+
     echo ""
     echo " If you get trouble when use backuptogoogle please go to following URLs:"
     echo " https://backuptogoogle.com"
@@ -230,7 +220,7 @@ _uninstall(){
 _help(){
     echo "butgg.sh - Backup to Google Drive solution"
     echo ""
-    echo "Usage: $0 [options]"
+    echo "Usage: butgg.sh [options]"
     echo ""
     echo "Options:"
     echo "  --help      show this help message and exit"
@@ -245,5 +235,5 @@ case $1 in
     --setup)     _setup ;;
     --update)    _update ;;
     --uninstall) _uninstall ;;
-    *)           echo "No such command: $1. Please use $0 --help" ;;
+    *)           echo "No such command: $1. Please use butgg.sh --help" ;;
 esac

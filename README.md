@@ -1,5 +1,4 @@
 # backuptogoogle
----
 # What script can do?
 - Complie gdrive on your server with your Google credential
 - Create cron auto backup

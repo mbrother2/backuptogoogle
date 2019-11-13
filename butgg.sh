@@ -148,7 +148,7 @@ build_gdrive(){
 # Setup gdrive credential
 setup_credential(){
     show_write_log "Setting up gdrive credential..."
-    gdrive about
+    ${GDRIVE_BIN} about
 }
 
 # Set up cron backup

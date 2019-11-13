@@ -227,6 +227,7 @@ show_info(){
     show_write_log "+-----"
     show_write_log "| SUCESSFUL! Your information:"
     show_write_log "| Backup dir      : ${BACKUP_DIR}"
+    show_write_log "| Config file     : ${BUTGG_CONF}"
     show_write_log "| Log file        : ${LOG_FILE}"
     show_write_log "| Keep backup     : ${DAY_REMOVE} days"
     show_write_log "| butgg.sh file   : ${SETUP_FILE}"

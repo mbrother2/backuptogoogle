@@ -237,7 +237,7 @@ show_info(){
     show_write_log "+-----"
 
     echo ""
-    echo " If you get trouble when use backuptogoogle please report here:"
+    echo " If you get trouble when use butgg.sh please report here:"
     echo " https://github.com/mbrother2/backuptogoogle/issues"
 }
 

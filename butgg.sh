@@ -142,7 +142,12 @@ build_gdrive(){
     if [ $? -ne 0 ]
     then
         echo "Command git not found. Trying to install git..."
-        yum -y install git
+        if [ -f /etc/redhat-release ]
+        then
+            yum -y install git
+        else
+            apt-get install git
+        fi
         which git
         if [ $? -ne 0 ]
         then

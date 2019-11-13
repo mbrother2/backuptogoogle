@@ -42,9 +42,27 @@ check_md5sum(){
     fi
 }
 
+# Check log file
+check_log_file(){
+    if [ ! -f ${BUTGG_CONF} ]
+    then
+        LOG_FILE=${DF_LOG_FILE}
+    else
+        LOG_FILE=`cat ${BUTGG_CONF} | grep "^LOG_FILE"   | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
+        if [ "${LOG_FILE}" == "" ]
+        then
+            LOG_FILE=${DF_LOG_FILE}
+            show_write_log "---"
+            show_write_log "`change_color yellow [WARNING]` LOG_FILE does not exist. Use default config"
+        else
+            show_write_log "---"
+        fi
+    fi
+}
+
 # Write log
 show_write_log(){
-    echo "`date "+[ %d/%m/%Y %H:%M:%S ]"` $1" | tee -a ${DF_LOG_FILE}
+    echo "`date "+[ %d/%m/%Y %H:%M:%S ]"` $1" | tee -a ${LOG_FILE}
 }
 
 # Create necessary directory
@@ -66,12 +84,6 @@ create_dir(){
 
 # Prepare setup
 pre_setup(){
-    which git
-    if [ $? -ne 0 ]
-    then
-        echo "Command git not found. Please check again. Exit"
-        exit 1
-    fi
     create_dir bin
     create_dir .gdrive
 }
@@ -108,7 +120,7 @@ detect_os(){
         show_write_log "Sorry! We do not support your OS. Exit"
         exit 1
     fi
-    show_write_log "OS supported!"
+    show_write_log "OS supported"
 }
 
 # Download file from Github
@@ -122,6 +134,12 @@ download_file(){
 
 # Build GDRIVE_BIN
 build_gdrive(){
+    which git
+    if [ $? -ne 0 ]
+    then
+        echo "Command git not found. Please check again. Exit"
+        exit 1
+    fi
     cd $HOME/.gdrive
     show_write_log "Downloading go from Google..."
     curl -o ${GO_FILE}.tar.gz https://dl.google.com/go/${GO_FILE}.tar.gz
@@ -158,7 +176,7 @@ setup_cron(){
     read -p " How many days you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE    
     [[ -z "${BACKUP_DIR}" ]] && BACKUP_DIR="${DF_BACKUP_DIR}"
     [[ -z "${DAY_REMOVE}" ]] && DAY_REMOVE="${DF_DAY_REMOVE}"
-    echo "LOG_FILE=${DF_LOG_FILE}" > ${BUTGG_CONF}
+    echo "LOG_FILE=${LOG_FILE}" > ${BUTGG_CONF}
     echo "BACKUP_DIR=${BACKUP_DIR}" >> ${BUTGG_CONF}
     echo "DAY_REMOVE=${DAY_REMOVE}" >> ${BUTGG_CONF}
     if [ ! -d ${BACKUP_DIR} ]
@@ -192,7 +210,7 @@ show_info(){
     show_write_log "SUCESSFUL! Your information:"
     show_write_log "---"
     show_write_log "Backup dir : ${BACKUP_DIR}"
-    show_write_log "Log file   : ${DF_LOG_FILE}"
+    show_write_log "Log file   : ${LOG_FILE}"
     show_write_log "Keep backup: ${DAY_REMOVE} days"
     show_write_log "---"
     show_write_log "butgg.sh file   : ${SETUP_FILE}"
@@ -208,6 +226,7 @@ show_info(){
 }
 
 _setup(){
+    check_log_file
     pre_setup
     check_network
     detect_os
@@ -219,6 +238,7 @@ _setup(){
 }
 
 _update(){
+    check_log_file
     pre_setup
     check_network
     detect_os

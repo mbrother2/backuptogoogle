@@ -46,5 +46,6 @@ butgg.sh --update
 Update to latest version
 ###### 4. Uninstall
 ```
+butgg.sh --uninstall
 ```
 Remove all butgg scripts and .gdrive directory

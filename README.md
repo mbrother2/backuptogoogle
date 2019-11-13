@@ -107,6 +107,7 @@ Max upload size: 5.2 TB
 [ 13/11/2019 15:47:31 ] +-----
 [ 13/11/2019 15:47:31 ] | SUCESSFUL! Your information:
 [ 13/11/2019 15:47:31 ] | Backup dir      : /home/thanh1/backup
+[ 13/11/2019 15:47:31 ] | Log file        : /home/thanh1/.gdrive/butgg.conf
 [ 13/11/2019 15:47:31 ] | Log file        : /home/thanh1/.gdrive/butgg.log
 [ 13/11/2019 15:47:31 ] | Keep backup     : 7 days
 [ 13/11/2019 15:47:31 ] | butgg.sh file   : /home/thanh1/bin/butgg.sh

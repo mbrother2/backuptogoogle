@@ -112,7 +112,7 @@ build_gdrive(){
     show_write_log "Downloading go from Google..."
     curl -o go1.12.5.linux-amd64.tar.gz https://dl.google.com/go/go1.12.5.linux-amd64.tar.gz
     show_write_log "Extracting go lang..."
-    tar -C ${HOME}/bin -xf go1.12.5.linux-amd64.tar.gz
+    tar -xf go1.12.5.linux-amd64.tar.gz
     show_write_log "Cloning gdrive project from Github..."
     git clone https://github.com/gdrive-org/gdrive.git
     show_write_log "Build your own gdrive!"

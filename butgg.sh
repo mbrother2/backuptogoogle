@@ -66,7 +66,7 @@ create_dir(){
 # Prepare setup
 pre_setup(){
     create_dir bin
-    create_dir .gdrive/script
+    create_dir .gdrive
 }
 
 # Check network
@@ -108,7 +108,7 @@ download_file(){
 
 # Build GDRIVE_BIN
 build_gdrive(){
-    cd ${HOME}/.gdrive/script
+    cd ${HOME}/.gdrive
     show_write_log "Downloading go from Google..."
     curl -o go1.12.5.linux-amd64.tar.gz https://dl.google.com/go/go1.12.5.linux-amd64.tar.gz
     show_write_log "Extracting go lang..."
@@ -118,15 +118,15 @@ build_gdrive(){
     show_write_log "Build your own gdrive!"
     read -p " Your Google API client_id: " gg_client_id
     read -p " Your Google API client_secret: " gg_client_secret
-    sed -i "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" ${HOME}/.gdrive/script/gdrive/handlers_drive.go
-    sed -i "s#^const ClientSecret =.*#const ClientSecret = \"${gg_client_secret}\"#g" ${HOME}/.gdrive/script/gdrive/handlers_drive.go
+    sed -i "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" ${HOME}/.gdrive/gdrive/handlers_drive.go
+    sed -i "s#^const ClientSecret =.*#const ClientSecret = \"${gg_client_secret}\"#g" ${HOME}/.gdrive/gdrive/handlers_drive.go
     show_write_log "Building gdrive..."
-    ${HOME}/.gdrive/script/go/bin/go get github.com/prasmussen/gdrive
-    ${HOME}/.gdrive/script/go/bin/go build -ldflags '-w -s'
-    mv ${HOME}/.gdrive/script/gdrive/gdrive ${HOME}/.gdrive/script/gdrive
-    chmod 755 ${HOME}/.gdrive/script/gdrive
-    rm -rf ${HOME}/.gdrive/script/go
-    rm -rf ${HOME}/.gdrive/script/gdrive
+    ${HOME}/.gdrive/go/bin/go get github.com/prasmussen/gdrive
+    ${HOME}/.gdrive/go/bin/go build -ldflags '-w -s'
+    mv ${HOME}/.gdrive/gdrive/gdrive ${HOME}/bin/gdrive
+    chmod 755 ${HOME}/.gdrive/gdrive
+    rm -rf ${HOME}/.gdrive/go
+    rm -rf ${HOME}/.gdrive/gdrive
 }
 
 # Setup gdrive credential

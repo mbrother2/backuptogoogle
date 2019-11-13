@@ -11,6 +11,7 @@ GDRIVE_BIN="${HOME}/bin/gdrive"
 CRON_BACKUP="${HOME}/bin/cron_backup.sh"
 SETUP_FILE="${HOME}/bin/butgg.sh"
 CRON_TEMP="${HOME}/.gdrive/old_cron"
+SECOND_OPTION=$2
 
 # Color variables
 GREEN='\e[32m'
@@ -136,6 +137,7 @@ download_file(){
 
 # Build GDRIVE_BIN
 build_gdrive(){
+    [[ "${SECOND_OPTION}" == "--no-build" ]] && return 0
     which git
     if [ $? -ne 0 ]
     then

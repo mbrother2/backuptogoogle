@@ -18,6 +18,8 @@ RED='\e[31m'
 YELLOW='\e[33m'
 REMOVE='\e[0m'
 
+
+
 # Change color of words
 change_color(){
     case $1 in
@@ -207,7 +209,7 @@ setup_cron(){
 
 show_info(){
     echo ""
-    show_write_log "+-----------------------------"
+    show_write_log "+-----"
     show_write_log "| SUCESSFUL! Your information:"
     show_write_log "| Backup dir      : ${BACKUP_DIR}"
     show_write_log "| Log file        : ${LOG_FILE}"
@@ -217,7 +219,7 @@ show_info(){
     show_write_log "| Gdrive bin file : ${GDRIVE_BIN}"
     show_write_log "| Cron backup     : ${SHOW_CRON}"
     show_write_log "| Google token    : ${HOME}/.gdrive/token_v2.json"
-    show_write_log "+-----------------------------"
+    show_write_log "+-----"
 
     echo ""
     echo " If you get trouble when use backuptogoogle please go to following URLs:"

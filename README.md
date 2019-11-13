@@ -16,6 +16,8 @@ Run command:
 curl -o butgg.sh https://raw.githubusercontent.com/mbrother2/backuptogoogle/master/butgg.sh
 sh butgg.sh --setup
 ```
+# Create own Google credential step by step
+https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step
 # Options
 Run command `sh butgg.sh --help` to show all options( After install you only need run `butgg.sh --help`)
 ```

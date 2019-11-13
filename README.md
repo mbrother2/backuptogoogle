@@ -25,12 +25,12 @@ Options:
   --uninstall uninstall butgg.sh
 ```
 # Command
-1. Help
+###### 1. Help
 ```
 butgg.sh --help
 ```
 Show help message and exit
-2. Setup
+###### 2. Setup
 ```
 butgg.sh --setup
 ```
@@ -39,12 +39,12 @@ Set up or reset all scripts & config file
 butgg.sh --setup no-build
 ```
 Setup or reset all scripts & config file without build gdrive
-3. Update
+###### 3. Update
 ```
 butgg.sh --update
 ```
 Update to latest version
-4. Uninstall
+###### 4. Uninstall
 ```
 ```
 Remove all butgg scripts and .gdrive directory

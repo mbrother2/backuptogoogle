@@ -33,14 +33,19 @@ https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-st
 # Options
 Run command `sh butgg.sh --help` to show all options( After install you only need run `butgg.sh --help`)
 ```
+butgg.sh - Backup to Google Drive solution
+
 Usage: butgg.sh [options] [command]
 
 Options:
-  --help      show this help message and exit
-  --setup     setup or reset all scripts & config file
-    no-build  setup or reset all scripts & config file without build gdrive
-  --update    update to latest version
-  --uninstall uninstall butgg.sh
+  --help       show this help message and exit
+  --setup      setup or reset all scripts & config file
+    config     only setup config
+    credential only setup credential
+    no-build   setup butgg without build gdrive
+    no-update  setup butgg without update script
+  --update     update to latest version
+  --uninstall  remove all butgg scripts and .gdrive directory
 ```
 # Command
 ###### 1. Help

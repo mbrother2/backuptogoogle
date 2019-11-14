@@ -182,6 +182,7 @@ build_gdrive(){
     show_write_log "Extracting go lang..."
     tar -xf ${GO_FILE}.tar.gz
     show_write_log "Cloning gdrive project from Github..."
+    rm -rf gdrive
     git clone https://github.com/gdrive-org/gdrive.git
     show_write_log "Build your own gdrive!"
     echo "Please go to URL to create your own Google credential:"

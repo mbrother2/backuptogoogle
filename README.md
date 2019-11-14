@@ -21,6 +21,7 @@ $HOME/$USER
 - CentOS
 - Debian
 - Ubuntu
+- FreeBSD
 ---
 # How to use
 Run command:

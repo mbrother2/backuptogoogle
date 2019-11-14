@@ -326,7 +326,7 @@ _setup(){
     if [ -z "${SECOND_OPTION}" ]
     then
         pre_setup
-        #check_network
+        check_network
         detect_os
         download_file
         build_gdrive

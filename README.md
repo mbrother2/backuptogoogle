@@ -42,6 +42,7 @@ Options:
   --setup      setup or reset all scripts & config file
     config     only setup config
     credential only setup credential
+    only-build only build gdrive bin
     no-build   setup butgg without build gdrive
     no-update  setup butgg without update script
   --update     update to latest version
@@ -139,6 +140,10 @@ Only edit butgg.conf
 butgg.sh --setup credential
 ```
 Only reset Google Drive token
+```
+butgg.sh --setup only-build
+```
+Only build gdrive bin
 ```
 butgg.sh --setup no-build
 ```

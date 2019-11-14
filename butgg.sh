@@ -179,7 +179,7 @@ build_gdrive(){
         show_write_log "`change_color red [ERROR]` Can not build gdrive. Exit"
         exit 1
     else
-        show_write_log "Build gdrive successful"
+        show_write_log "Build gdrive successful. Gdrive bin locate here ${GDRIVE_BIN} "
     fi
     mv $HOME/.gdrive/gdrive/gdrive $HOME/bin/gdrive
     chmod 755 $HOME/.gdrive/gdrive
@@ -316,6 +316,12 @@ _setup(){
                 setup_cron
                 show_info
                 ;;
+            only-build)
+                pre_setup
+                check_network
+                detect_os
+                build_gdrive
+                ;;
             *)
                 show_write_log "No such command: ${SECOND_OPTION}. Please use butgg.sh --help"
                 ;;
@@ -349,6 +355,7 @@ _help(){
     echo "  --setup      setup or reset all scripts & config file"
     echo "    config     only setup config"
     echo "    credential only setup credential"
+    echo "    only-build only build gdrive bin"
     echo "    no-build   setup butgg without build gdrive"
     echo "    no-update  setup butgg without update script"
     echo "  --update     update to latest version"

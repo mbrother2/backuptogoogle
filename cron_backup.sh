@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Setup variables
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
@@ -29,7 +29,10 @@ change_color(){
 
 # Show processing and write log
 show_write_log(){
-    [[ "${FIRST_OPTION}" == "-v" ]] && echo `date "+[ %d/%m/%Y %H:%M:%S ]"` $1
+    if [ "${FIRST_OPTION}" == "-v" ]
+    then
+        echo `date "+[ %d/%m/%Y %H:%M:%S ]"` $1
+    fi
     echo `date "+[ %d/%m/%Y %H:%M:%S ]"` $1 >> ${LOG_FILE}
 }
 
@@ -47,20 +50,48 @@ check_file_type(){
     fi
 }
 
+# Detect OS
+detect_os(){
+    show_write_log "Checking OS..."
+    if [ -f /etc/redhat-release ]
+    then
+        OS="CentOS"
+    elif [ -f /usr/bin/lsb_release ]
+    then
+        OS="Ubuntu"
+    elif [ -f /etc/freebsd-update.conf ]
+    then
+        OS="FreeBSD"
+    else
+        show_write_log "Sorry! We do not support your OS. Exit"
+        exit 1
+    fi
+    show_write_log "OS supported"
+}
+
 # Write config
 check_config(){
     if [ "$3" == "" ]
     then
         VAR=$1
         eval "$VAR"="$2"
-        [[ $1 == LOG_FILE ]] && show_write_log "---"
+        if [ $1 == LOG_FILE ]
+        then
+            show_write_log "---"
+        fi
         show_write_log "`change_color yellow [WARNING]` $1 does not exist. Use default config"
-        [[ -f ${BUTGG_CONF} ]] && sed -i "/^$1/d" ${BUTGG_CONF}
+        if [ -f ${BUTGG_CONF} ]
+        then
+            sed -i ".${TODAY}" "/^$1/d" ${BUTGG_CONF}
+        fi
         echo "$1=$2" >> ${BUTGG_CONF}
     else
         VAR=$1
         eval "$VAR"="$3"
-        [[ $1 == LOG_FILE ]] && show_write_log "---"
+        if [ $1 == LOG_FILE ]
+        then
+            show_write_log "---"
+        fi
     fi
 }
 
@@ -133,7 +164,7 @@ run_upload(){
         check_file_type "${BACKUP_DIR}/$i"            
         show_write_log "Uploading ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}..."                
         UPLOAD_FILE=`${GDRIVE_BIN} upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
-        if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
+        if [ "${UPLOAD_FILE}" == *"Error"* ] || [ "${UPLOAD_FILE}" == *"Fail"* ]
         then
             show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}"
             show_write_log "Something wrong!!! Exit."
@@ -146,7 +177,12 @@ run_upload(){
 }
 
 remove_old_dir(){
-    OLD_BACKUP_DAY=`date +%d_%m_%Y -d "-${DAY_REMOVE} day"`
+    if [ "${OS}" == "CentOS" ] || [ "${OS}" == "Ubuntu" ]
+    then
+        OLD_BACKUP_DAY=`date +%d_%m_%Y -d "-${DAY_REMOVE} day"`
+    else
+        OLD_BACKUP_DAY=`date -v-${DAY_REMOVE}d +%d_%m_%Y`
+    fi
     OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
     if [ "${OLD_BACKUP_ID}" != "" ]
     then
@@ -165,6 +201,7 @@ remove_old_dir(){
 
 # Main functions
 get_config
+detect_os
 check_info
 run_upload
 remove_old_dir

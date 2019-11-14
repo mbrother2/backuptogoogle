@@ -176,7 +176,7 @@ build_gdrive(){
     $HOME/.gdrive/go/bin/go build -ldflags '-w -s'
     if [ $? -ne 0 ]
     then
-        show_write_log "Can not build gdrive. Exit"
+        show_write_log "`change_color red [ERROR]` Can not build gdrive. Exit"
         exit 1
     else
         show_write_log "Build gdrive successful"
@@ -198,7 +198,7 @@ setup_credential(){
     ${GDRIVE_BIN} about
     if [ $? -ne 0 ]
     then
-        show_write_log "Can not create gdrive credential. Please run \"${GDRIVE_BIN} about\" to create it after"
+        show_write_log "`change_color yellow [WARNING]` Can not create gdrive credential. Please run \"${GDRIVE_BIN} about\" to create it after"
         sleep 3
     else
         show_write_log "Setup gdrive credential successful"

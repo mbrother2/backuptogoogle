@@ -338,11 +338,28 @@ _update(){
 }
 
 _uninstall(){
-    rm -rf ${HOME}/.gdrive
-    rm -f ${GDRIVE_BIN}
-    rm -f ${CRON_BACKUP}
-    rm -f ${SETUP_FILE}
-    echo "Uninstall butgg.sh successful"
+    check_log_file
+    show_write_log "Removing all butgg.sh scripts..."
+    rm -f ${GDRIVE_BIN} ${CRON_BACKUP} ${SETUP_FILE}
+    if [ $? -ne 0 ]
+    then
+        show_write_log "Can not remove all butgg.sh scripts. Please check permission of these files"
+    else
+        show_write_log "Remove all butgg.sh scripts successful"
+    fi
+    read -p " Do you want remove ${HOME}/.gdrive directory?(y/n) " REMOVE_GDRIVE_DIR
+    if [[ "${REMOVE_GDRIVE_DIR}" == "y" ]] || [[ "${REMOVE_GDRIVE_DIR}" == "Y" ]]
+    then
+        rm -rf ${HOME}/.gdrive
+        if [ $? -ne 0 ]
+        then
+            show_write_log "Can not remove directory ${HOME}/.gdrive. Please check permission of this directory"
+        else
+            echo "Remove directory ${HOME}/.gdrive successful"
+        fi
+    else
+        show_write_log "Skip remove ${HOME}/.gdrive directory"
+    fi
 }
 
 _help(){

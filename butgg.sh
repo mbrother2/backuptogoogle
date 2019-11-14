@@ -198,7 +198,8 @@ setup_credential(){
     ${GDRIVE_BIN} about
     if [ $? -ne 0 ]
     then
-        show_write_log "Can not create gdrive credential. Please run \"${GDRIVE_BIN} about\" to create it. Exit"
+        show_write_log "Can not create gdrive credential. Please run \"${GDRIVE_BIN} about\" to create it after"
+        sleep 3
     else
         show_write_log "Setup gdrive credential successful"
     fi

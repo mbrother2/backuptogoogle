@@ -8,6 +8,7 @@ DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
 GDRIVE_BIN="${HOME}/bin/gdrive"
+GDRIVE_TOKEN="${HOME}/.gdrive/token_v2.json"
 CRON_BACKUP="${HOME}/bin/cron_backup.sh"
 SETUP_FILE="${HOME}/bin/butgg.sh"
 CRON_TEMP="${HOME}/.gdrive/old_cron"
@@ -173,6 +174,13 @@ build_gdrive(){
     cd $HOME/.gdrive/gdrive
     $HOME/.gdrive/go/bin/go get github.com/prasmussen/gdrive
     $HOME/.gdrive/go/bin/go build -ldflags '-w -s'
+    if [ $? -ne 0 ]
+    then
+        show_write_log "Can not build gdrive. Exit"
+        exit 1
+    else
+        show_write_log "Build gdrive successful"
+    fi
     mv $HOME/.gdrive/gdrive/gdrive $HOME/bin/gdrive
     chmod 755 $HOME/.gdrive/gdrive
     rm -f $HOME/.gdrive/${GO_FILE}.tar.gz
@@ -183,12 +191,22 @@ build_gdrive(){
 # Setup gdrive credential
 setup_credential(){
     show_write_log "Setting up gdrive credential..."
+    if [ "${SECOND_OPTION}" == "credential" ]
+    then
+        [[ -f ${GDRIVE_TOKEN} ]] && rm -f ${GDRIVE_TOKEN}
+    fi
     ${GDRIVE_BIN} about
+    if [ $? -ne 0 ]
+    then
+        show_write_log "Can not create gdrive credential. Please run \"${GDRIVE_BIN} about\" to create it. Exit"
+    else
+        show_write_log "Setup gdrive credential successful"
+    fi
 }
 
-# Set up cron backup
-setup_cron(){
-    show_write_log "Setting up cron backup..."
+# Set up config file
+setup_config(){
+    show_write_log "Setting up config file..."
     read -p " Which directory do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
     read -p " How many days you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE    
     [[ -z "${BACKUP_DIR}" ]] && BACKUP_DIR="${DF_BACKUP_DIR}"
@@ -196,11 +214,23 @@ setup_cron(){
     echo "LOG_FILE=${LOG_FILE}" > ${BUTGG_CONF}
     echo "BACKUP_DIR=${BACKUP_DIR}" >> ${BUTGG_CONF}
     echo "DAY_REMOVE=${DAY_REMOVE}" >> ${BUTGG_CONF}
-    if [ ! -d ${BACKUP_DIR} ]
+    if [ $? -ne 0 ]
     then
-        show_write_log "`change_color yellow [WARNING]` Directory ${BACKUP_DIR} does not exist! Ensure you will be create it after."
-        sleep 3
-    fi
+        show_write_log "`change_color red [ERROR]` Can not write config to file ${BUTGG_CONF}. Please check permission of this file. Exit"
+        exit 1
+    else
+        if [ ! -d ${BACKUP_DIR} ]
+        then
+            show_write_log "`change_color yellow [WARNING]` Directory ${BACKUP_DIR} does not exist! Ensure you will be create it after."
+            sleep 3
+        fi
+        show_write_log "Setup config file successful"
+    fi       
+}
+
+# Set up cron backup
+setup_cron(){
+    show_write_log "Setting up cron backup..."
     crontab -l > ${CRON_TEMP}
     CHECK_CRON=`cat ${CRON_TEMP} | grep -c "cron_backup.sh"`
     if [ ${CHECK_CRON} -eq 0 ]
@@ -217,41 +247,79 @@ setup_cron(){
             SHOW_CRON="0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1"
         fi
     else
+        show_write_log "Cron backup existed. Skip"
         SHOW_CRON=`cat ${CRON_TEMP} | grep "cron_backup.sh"`
     fi
     rm -f  ${CRON_TEMP}
 }
 
+# Show information
 show_info(){
     echo ""
-    show_write_log "+-----"
-    show_write_log "| SUCESSFUL! Your information:"
-    show_write_log "| Backup dir      : ${BACKUP_DIR}"
-    show_write_log "| Config file     : ${BUTGG_CONF}"
-    show_write_log "| Log file        : ${LOG_FILE}"
-    show_write_log "| Keep backup     : ${DAY_REMOVE} days"
-    show_write_log "| butgg.sh file   : ${SETUP_FILE}"
-    show_write_log "| Cron backup file: ${CRON_BACKUP}"
-    show_write_log "| Gdrive bin file : ${GDRIVE_BIN}"
-    show_write_log "| Cron backup     : ${SHOW_CRON}"
-    show_write_log "| Google token    : ${HOME}/.gdrive/token_v2.json"
-    show_write_log "+-----"
+    if [ "${SECOND_OPTION}" == config ]
+    then
+        show_write_log "+-----"
+        show_write_log "| SUCESSFUL! Your information:"
+        show_write_log "| Backup dir      : ${BACKUP_DIR}"
+        show_write_log "| Config file     : ${BUTGG_CONF}"
+        show_write_log "+-----"
+    else
+        show_write_log "+-----"
+        show_write_log "| SUCESSFUL! Your information:"
+        show_write_log "| Backup dir      : ${BACKUP_DIR}"
+        show_write_log "| Config file     : ${BUTGG_CONF}"
+        show_write_log "| Log file        : ${LOG_FILE}"
+        show_write_log "| Keep backup     : ${DAY_REMOVE} days"
+        show_write_log "| butgg.sh file   : ${SETUP_FILE}"
+        show_write_log "| Cron backup file: ${CRON_BACKUP}"
+        show_write_log "| Gdrive bin file : ${GDRIVE_BIN}"
+        show_write_log "| Cron backup     : ${SHOW_CRON}"
+        show_write_log "| Google token    : ${GDRIVE_TOKEN}"
+        show_write_log "+-----"
 
-    echo ""
-    echo " If you get trouble when use butgg.sh please report here:"
-    echo " https://github.com/mbrother2/backuptogoogle/issues"
+        echo ""
+        echo " If you get trouble when use butgg.sh please report here:"
+        echo " https://github.com/mbrother2/backuptogoogle/issues"
+    fi
 }
 
 _setup(){
     check_log_file
-    pre_setup
-    check_network
-    detect_os
-    download_file
-    build_gdrive
-    setup_credential
-    setup_cron
-    show_info
+    if [ -z "${SECOND_OPTION}" ]
+    then
+        pre_setup
+        check_network
+        detect_os
+        download_file
+        build_gdrive
+        setup_credential
+        setup_config
+        setup_cron
+        show_info
+    else
+        case ${SECOND_OPTION} in
+            config)
+                setup_config
+                show_info
+                ;;
+            credential)
+                setup_credential
+                ;;
+            no-update)
+                pre_setup
+                check_network
+                detect_os
+                build_gdrive
+                setup_credential
+                setup_config
+                setup_cron
+                show_info
+                ;;
+            *)
+                show_write_log "No such command: ${SECOND_OPTION}. Please use butgg.sh --help"
+                ;;
+        esac
+    fi
 }
 
 _update(){
@@ -276,11 +344,14 @@ _help(){
     echo "Usage: butgg.sh [options] [command]"
     echo ""
     echo "Options:"
-    echo "  --help      show this help message and exit"
-    echo "  --setup     setup or reset all scripts & config file"
-    echo "    no-build  setup or reset all scripts & config file without build gdrive"
-    echo "  --update    update to latest version"
-    echo "  --uninstall remove all butgg scripts and .gdrive directory"
+    echo "  --help       show this help message and exit"
+    echo "  --setup      setup or reset all scripts & config file"
+    echo "    config     only setup config"
+    echo "    credential only setup credential"
+    echo "    no-build   setup butgg without build gdrive"
+    echo "    no-update  setup butgg without update script"
+    echo "  --update     update to latest version"
+    echo "  --uninstall  remove all butgg scripts and .gdrive directory"
 }
 
 # Main functions
@@ -289,5 +360,5 @@ case $1 in
     --setup)     _setup ;;
     --update)    _update ;;
     --uninstall) _uninstall ;;
-    *)           echo "No such command: $1. Please use butgg.sh --help" ;;
+    *)           echo "No such option: $1. Please use butgg.sh --help" ;;
 esac

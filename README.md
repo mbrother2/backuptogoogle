@@ -151,6 +151,7 @@ Max upload size: 5.2 TB
  If you get trouble when use butgg.sh please report here:
  https://github.com/mbrother2/backuptogoogle/issues
 ```
+---
 ```
 butgg.sh --setup config
 ```
@@ -171,6 +172,7 @@ Only edit butgg.conf
 [ 15/11/2019 08:42:06 ] | Config file     : /home/thanh1/.gdrive/butgg.conf
 [ 15/11/2019 08:42:06 ] +-----
 ```
+---
 ```
 butgg.sh --setup credential
 ```
@@ -192,6 +194,7 @@ Total: 16.1 GB
 Max upload size: 5.2 TB
 [ 15/11/2019 08:47:01 ] Setup gdrive credential successful
 ```
+---
 ```
 butgg.sh --setup only-build
 ```
@@ -237,6 +240,7 @@ https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-st
 [ 15/11/2019 08:45:34 ] Building gdrive...
 [ 15/11/2019 08:45:36 ] Build gdrive successful. Gdrive bin locate here /home/thanh1/bin/gdrive
 ```
+---
 ```
 butgg.sh --setup no-build
 ```
@@ -290,6 +294,7 @@ Max upload size: 5.2 TB
  If you get trouble when use butgg.sh please report here:
  https://github.com/mbrother2/backuptogoogle/issues
 ```
+---
 ```
 butgg.sh --setup no-update
 ```

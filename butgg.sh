@@ -152,10 +152,6 @@ download_file(){
 
 # Build GDRIVE_BIN
 build_gdrive(){
-    if [ "${SECOND_OPTION}" == "no-build" ]
-    then
-        return 0
-    fi
     which git
     if [ $? -ne 0 ]
     then
@@ -344,6 +340,22 @@ _setup(){
             credential)
                 setup_credential
                 ;;
+            only-build)
+                pre_setup
+                check_network
+                detect_os
+                build_gdrive
+                ;;
+            no-build)
+                pre_setup
+                check_network
+                detect_os
+                download_file
+                setup_credential
+                setup_config
+                setup_cron
+                show_info
+                ;;
             no-update)
                 pre_setup
                 check_network
@@ -353,12 +365,6 @@ _setup(){
                 setup_config
                 setup_cron
                 show_info
-                ;;
-            only-build)
-                pre_setup
-                check_network
-                detect_os
-                build_gdrive
                 ;;
             *)
                 show_write_log "No such command: ${SECOND_OPTION}. Please use butgg.sh --help"

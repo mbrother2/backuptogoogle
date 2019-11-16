@@ -1,4 +1,4 @@
-# backuptogoogle (butgg.sh)
+# backuptogoogle (Linux: butgg.bash - BSD: butgg.sh)
 # What can this script do?
 - Complie gdrive (https://github.com/gdrive-org/gdrive) on your server with your Google credential
 - Create cron auto backup
@@ -9,8 +9,8 @@
 ```
 $HOME (/root or /home/$USER)
    ├── bin
-   │    ├── butgg.sh
-   │    ├── cron_backup.sh
+   │    ├── butgg.bash (or butgg.sh on BSD system)
+   │    ├── cron_backup.bash (or cron_backup.sh on BSD system)
    │    └── gdrive
    └── .gdrive
         ├── butgg.conf
@@ -18,13 +18,16 @@ $HOME (/root or /home/$USER)
         └── token_v2.json
 ```
 # OS support(x86_64):
-- CentOS
-- Debian
-- ~~Ubuntu~~ (issue [#1](https://github.com/mbrother2/backuptogoogle/issues/1))
-- FreeBSD
+- **Linux:** CentOS, CloudLinux, Ubuntu, openSUSE
+- **BSD:** FreeBSD
 ---
 # How to use
-Run command:
+**On Linux system:**
+```
+curl -o butgg.bash https://raw.githubusercontent.com/mbrother2/backuptogoogle/master/butgg.bash
+bash butgg.bash --setup
+```
+**On BSD system:**
 ```
 curl -o butgg.sh https://raw.githubusercontent.com/mbrother2/backuptogoogle/master/butgg.sh
 sh butgg.sh --setup
@@ -32,11 +35,11 @@ sh butgg.sh --setup
 # Create own Google credential step by step
 https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step
 # Options
-Run command `sh butgg.sh --help` to show all options( After install you only need run `butgg.sh --help`)
+Run command `bash butgg.bash --help`(or `sh butgg.sh --help` on BSD system) to show all options( After install you only need run `butgg.bash --help`(or `butgg.sh --help` on BSD system))
 ```
-butgg.sh - Backup to Google Drive solution
+butgg.bash - Backup to Google Drive solution
 
-Usage: butgg.sh [options] [command]
+Usage: butgg.bash [options] [command]
 
 Options:
   --help       show this help message and exit
@@ -51,16 +54,14 @@ Options:
 ```
 # Command
 ###### 1. Help
-```
-butgg.sh --help
-```
+`butgg.bash --help` (or `butgg.sh --help` on BSD system)
 Show help message and exit
 ##### Example
 ```
-[thanh1@centos7 .gdrive]$ butgg.sh --help
-butgg.sh - Backup to Google Drive solution
+[thanh1@centos7 .gdrive]$ butgg.bash --help
+butgg.bash - Backup to Google Drive solution
 
-Usage: butgg.sh [options] [command]
+Usage: butgg.bash [options] [command]
 
 Options:
   --help       show this help message and exit
@@ -74,13 +75,11 @@ Options:
   --uninstall  remove all butgg scripts and .gdrive directory
 ```
 ###### 2. Setup
-```
-butgg.sh --setup
-```
+`butgg.bash --setup` (or `butgg.sh --setup` on BSD system)
 Set up or reset all scripts & config file
 ##### Example
 ```
-[thanh1@centos7 ~]$ sh butgg.sh --setup
+[thanh1@centos7 ~]$ butgg.bash --setup
 [ 14/11/2019 10:54:25 ] Cheking network...
 [ 14/11/2019 10:54:25 ] Connect Github successful
 [ 14/11/2019 10:54:26 ] Connect Google successful
@@ -90,12 +89,12 @@ Set up or reset all scripts & config file
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100  5808  100  5808    0     0   7944      0 --:--:-- --:--:-- --:--:--  7956
-[ 14/11/2019 10:54:27 ] Check md5sum for file cron_backup.sh successful
+[ 14/11/2019 10:54:27 ] Check md5sum for file cron_backup.bash successful
 [ 14/11/2019 10:54:27 ] Downloading setup file from github...
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100 11151  100 11151    0     0  26427      0 --:--:-- --:--:-- --:--:-- 26424
-[ 14/11/2019 10:54:28 ] Check md5sum for file butgg.sh successful
+[ 14/11/2019 10:54:28 ] Check md5sum for file butgg.bash successful
 /usr/bin/git
 [ 14/11/2019 10:54:28 ] Downloading go from Google...
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
@@ -141,24 +140,22 @@ Max upload size: 5.2 TB
 [ 14/11/2019 10:55:50 ] | Config file     : /home/thanh1/.gdrive/butgg.conf
 [ 14/11/2019 10:55:50 ] | Log file        : /home/thanh1/.gdrive/butgg.log
 [ 14/11/2019 10:55:50 ] | Keep backup     : 30 days
-[ 14/11/2019 10:55:50 ] | butgg.sh file   : /home/thanh1/bin/butgg.sh
-[ 14/11/2019 10:55:50 ] | Cron backup file: /home/thanh1/bin/cron_backup.sh
+[ 14/11/2019 10:55:50 ] | butgg.sh file   : /home/thanh1/bin/butgg.bash
+[ 14/11/2019 10:55:50 ] | Cron backup file: /home/thanh1/bin/cron_backup.bash
 [ 14/11/2019 10:55:50 ] | Gdrive bin file : /home/thanh1/bin/gdrive
-[ 14/11/2019 10:55:50 ] | Cron backup     : 0 0 * * * sh /home/thanh1/bin/cron_backup.sh >/dev/null 2>&1
+[ 14/11/2019 10:55:50 ] | Cron backup     : 0 0 * * * bash /home/thanh1/bin/cron_backup.bash >/dev/null 2>&1
 [ 14/11/2019 10:55:50 ] | Google token    : /home/thanh1/.gdrive/token_v2.json
 [ 14/11/2019 10:55:50 ] +-----
 
- If you get trouble when use butgg.sh please report here:
+ If you get trouble when use butgg.bash please report here:
  https://github.com/mbrother2/backuptogoogle/issues
 ```
 ---
-```
-butgg.sh --setup config
-```
+`butgg.bash --setup config` (or `butgg.sh --setup config` on BSD system)
 Only edit butgg.conf
 ##### Example
 ```
-[thanh1@centos7 .gdrive]$ butgg.sh --setup config
+[thanh1@centos7 .gdrive]$ butgg.bash --setup config
 [ 15/11/2019 08:41:54 ] ---
 [ 15/11/2019 08:41:54 ] Setting up config file...
  Which directory do you want to upload to Google Drive?(default /home/thanh1/backup): /home/thanh1/backup2/backup
@@ -173,13 +170,11 @@ Only edit butgg.conf
 [ 15/11/2019 08:42:06 ] +-----
 ```
 ---
-```
-butgg.sh --setup credential
-```
+`butgg.bash --setup credential` (or `butgg.sh --setup credential` on BSD system)
 Only reset Google Drive token
 ##### Example
 ```
-[thanh1@centos7 .gdrive]$ butgg.sh --setup credential
+[thanh1@centos7 .gdrive]$ butgg.bash --setup credential
 [ 15/11/2019 08:46:41 ] ---
 [ 15/11/2019 08:46:41 ] Setting up gdrive credential...
 Authentication needed
@@ -195,25 +190,11 @@ Max upload size: 5.2 TB
 [ 15/11/2019 08:47:01 ] Setup gdrive credential successful
 ```
 ---
-```
-butgg.sh --setup only-build
-```
+`butgg.bash --setup only-build` (or `butgg.sh --setup only-build` on BSD system)
 Only build gdrive bin
 ##### Example
 ```
-[thanh1@centos7 .gdrive]$ butgg.sh --setup only-build
-[ 15/11/2019 08:42:38 ] ---
-[ 15/11/2019 08:42:38 ] Cheking network...
-[ 15/11/2019 08:42:39 ] Connect Github successful
-[ 15/11/2019 08:42:39 ] Connect Google successful
-[ 15/11/2019 08:42:39 ] Checking OS...
-[ 15/11/2019 08:42:39 ] OS supported
-/usr/bin/git
-[ 15/11/2019 08:42:39 ] Downloading go from Google...
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
- 12  122M   12 15.6M    0     0  2420k      0  0:00:51  0:00:06  0:00:45 2510k^C
-[thanh1@centos7 .gdrive]$ butgg.sh --setup only-build
+[thanh1@centos7 .gdrive]$ butgg.bash --setup only-build
 [ 15/11/2019 08:42:54 ] ---
 [ 15/11/2019 08:42:54 ] Cheking network...
 [ 15/11/2019 08:42:54 ] Connect Github successful
@@ -241,13 +222,11 @@ https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-st
 [ 15/11/2019 08:45:36 ] Build gdrive successful. Gdrive bin locate here /home/thanh1/bin/gdrive
 ```
 ---
-```
-butgg.sh --setup no-build
-```
+`butgg.sh --setup no-build` (or `butgg.sh --setup no-build` on BSD system)
 Setup butgg without build gdrive
 ##### Example
 ```
-[thanh1@centos7 .gdrive]$ butgg.sh --setup no-build
+[thanh1@centos7 .gdrive]$ butgg.bash --setup no-build
 [ 15/11/2019 08:53:15 ] ---
 [ 15/11/2019 08:53:15 ] Cheking network...
 [ 15/11/2019 08:53:15 ] Connect Github successful
@@ -258,12 +237,12 @@ Setup butgg without build gdrive
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100  6486  100  6486    0     0  15030      0 --:--:-- --:--:-- --:--:-- 15048
-[ 15/11/2019 08:53:16 ] Check md5sum for file cron_backup.sh successful
+[ 15/11/2019 08:53:16 ] Check md5sum for file cron_backup.bash successful
 [ 15/11/2019 08:53:16 ] Downloading setup file from github...
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100 13199  100 13199    0     0  34979      0 --:--:-- --:--:-- --:--:-- 35010
-[ 15/11/2019 08:53:17 ] Check md5sum for file butgg.sh successful
+[ 15/11/2019 08:53:17 ] Check md5sum for file butgg.bash successful
 [ 15/11/2019 08:53:17 ] Setting up gdrive credential...
 User: mbr other, backupxxxxxx@gmail.com
 Used: 
@@ -284,24 +263,22 @@ Max upload size: 5.2 TB
 [ 15/11/2019 08:53:25 ] | Config file     : /home/thanh1/.gdrive/butgg.conf
 [ 15/11/2019 08:53:25 ] | Log file        : /home/thanh1/.gdrive/butgg.log
 [ 15/11/2019 08:53:25 ] | Keep backup     : 7 days
-[ 15/11/2019 08:53:25 ] | butgg.sh file   : /home/thanh1/bin/butgg.sh
-[ 15/11/2019 08:53:25 ] | Cron backup file: /home/thanh1/bin/cron_backup.sh
+[ 15/11/2019 08:53:25 ] | butgg.sh file   : /home/thanh1/bin/butgg.bash
+[ 15/11/2019 08:53:25 ] | Cron backup file: /home/thanh1/bin/cron_backup.bash
 [ 15/11/2019 08:53:25 ] | Gdrive bin file : /home/thanh1/bin/gdrive
-[ 15/11/2019 08:53:25 ] | Cron backup     : 0 0 * * * sh /home/thanh1/bin/cron_backup.sh >/dev/null 2>&1
+[ 15/11/2019 08:53:25 ] | Cron backup     : 0 0 * * * bash /home/thanh1/bin/cron_backup.bash >/dev/null 2>&1
 [ 15/11/2019 08:53:25 ] | Google token    : /home/thanh1/.gdrive/token_v2.json
 [ 15/11/2019 08:53:25 ] +-----
 
- If you get trouble when use butgg.sh please report here:
+ If you get trouble when use butgg.bash please report here:
  https://github.com/mbrother2/backuptogoogle/issues
 ```
 ---
-```
-butgg.sh --setup no-update
-```
+`butgg.sh --setup no-update` (or `butgg.sh --setup no-update` on BSD system)
 Setup butgg without update script
 ##### Example
 ```
-[thanh1@centos7 .gdrive]$ butgg.sh --setup no-update
+[thanh1@centos7 .gdrive]$ butgg.bash --setup no-update
 [ 15/11/2019 08:54:20 ] ---
 [ 15/11/2019 08:54:20 ] Cheking network...
 [ 15/11/2019 08:54:20 ] Connect Github successful
@@ -347,24 +324,22 @@ Max upload size: 5.2 TB
 [ 15/11/2019 08:55:00 ] | Config file     : /home/thanh1/.gdrive/butgg.conf
 [ 15/11/2019 08:55:00 ] | Log file        : /home/thanh1/.gdrive/butgg.log
 [ 15/11/2019 08:55:00 ] | Keep backup     : 7 days
-[ 15/11/2019 08:55:00 ] | butgg.sh file   : /home/thanh1/bin/butgg.sh
-[ 15/11/2019 08:55:00 ] | Cron backup file: /home/thanh1/bin/cron_backup.sh
+[ 15/11/2019 08:55:00 ] | butgg.sh file   : /home/thanh1/bin/butgg.bash
+[ 15/11/2019 08:55:00 ] | Cron backup file: /home/thanh1/bin/cron_backup.bash
 [ 15/11/2019 08:55:00 ] | Gdrive bin file : /home/thanh1/bin/gdrive
-[ 15/11/2019 08:55:00 ] | Cron backup     : 0 0 * * * sh /home/thanh1/bin/cron_backup.sh >/dev/null 2>&1
+[ 15/11/2019 08:55:00 ] | Cron backup     : 0 0 * * * bash /home/thanh1/bin/cron_backup.bash >/dev/null 2>&1
 [ 15/11/2019 08:55:00 ] | Google token    : /home/thanh1/.gdrive/token_v2.json
 [ 15/11/2019 08:55:00 ] +-----
 
- If you get trouble when use butgg.sh please report here:
+ If you get trouble when use butgg.bash please report here:
  https://github.com/mbrother2/backuptogoogle/issues
  ```
 ###### 3. Update
-```
-butgg.sh --update
-```
+`butgg.sh --update` (or `butgg.sh --update` on BSD system)
 Update to latest version
 ##### Example
 ```
-[thanh1@centos7 .gdrive]$ butgg.sh --update
+[thanh1@centos7 .gdrive]$ butgg.bash --update
 [ 15/11/2019 08:56:43 ] ---
 [ 15/11/2019 08:56:43 ] Cheking network...
 [ 15/11/2019 08:56:43 ] Connect Github successful
@@ -375,39 +350,33 @@ Update to latest version
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100  6486  100  6486    0     0  14965      0 --:--:-- --:--:-- --:--:-- 14979
-[ 15/11/2019 08:56:44 ] Check md5sum for file cron_backup.sh successful
+[ 15/11/2019 08:56:44 ] Check md5sum for file cron_backup.bash successful
 [ 15/11/2019 08:56:44 ] Downloading setup file from github...
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100 13199  100 13199    0     0  35969      0 --:--:-- --:--:-- --:--:-- 35964
-[ 15/11/2019 08:56:45 ] Check md5sum for file butgg.sh successful
+[ 15/11/2019 08:56:45 ] Check md5sum for file butgg.bash successful
 ```
 ###### 4. Uninstall
-```
-butgg.sh --uninstall
-```
+`butgg.sh --uninstall` (or `butgg.sh --uninstall` on BSD system)
 Remove all butgg scripts and .gdrive directory
 ##### Example
 ```
-[thanh1@centos7 .gdrive]$ butgg.sh --uninstall
+[thanh1@centos7 .gdrive]$ butgg.bash --uninstall
 [ 15/11/2019 08:57:14 ] ---
-[ 15/11/2019 08:57:14 ] Removing all butgg.sh scripts...
-[ 15/11/2019 08:57:14 ] Remove all butgg.sh scripts successful
+[ 15/11/2019 08:57:14 ] Removing all butgg.bash scripts...
+[ 15/11/2019 08:57:14 ] Remove all butgg.bash scripts successful
  Do you want remove /home/thanh1/.gdrive directory?(y/n) n
 [ 15/11/2019 08:57:18 ] Skip remove /home/thanh1/.gdrive directory
 ```
 ###### 5. Run upload to Google Drive immediately
-```
-cron_backup.sh
-```
+`cron_backup.bash` (or `cron_backup.sh` on BSD system)
 Run upload to Google Drive immediately without show log
-```
-cron_backup.sh -v
-```
+`cron_backup.bash -v` (or `cron_backup.sh -v` on BSD system)
 Run upload to Google Drive immediately with show log detail
 ##### Example
 ```
-[thanh1@centos7 ~]$ cron_backup.sh -v
+[thanh1@centos7 ~]$ cron_backup.bash -v
 [ 14/11/2019 10:58:54 ] ---
 [ 14/11/2019 10:58:55 ] Start upload to Google Drive...
 [ 14/11/2019 10:58:56 ] Directory 14_11_2019 existed. Skipping...

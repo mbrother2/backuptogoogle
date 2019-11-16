@@ -20,7 +20,7 @@ $HOME (/root or /home/$USER)
 # OS support(x86_64):
 - CentOS
 - Debian
-- Ubuntu
+- ~~Ubuntu~~ (issue [#1](https://github.com/mbrother2/backuptogoogle/issues/1))
 - FreeBSD
 ---
 # How to use

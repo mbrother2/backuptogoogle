@@ -53,13 +53,7 @@ check_file_type(){
 # Detect OS
 detect_os(){
     show_write_log "Checking OS..."
-    if [ -f /etc/redhat-release ]
-    then
-        OS="CentOS"
-    elif [ -f /usr/bin/lsb_release ]
-    then
-        OS="Ubuntu"
-    elif [ -f /etc/freebsd-update.conf ]
+    if [ -f /etc/freebsd-update.conf ]
     then
         OS="FreeBSD"
     else
@@ -81,7 +75,7 @@ check_config(){
         fi
         show_write_log "`change_color yellow [WARNING]` $1 does not exist. Use default config"
         if [ -f ${BUTGG_CONF} ]
-        then
+        then            
             sed -i ".${TODAY}" "/^$1/d" ${BUTGG_CONF}
         fi
         echo "$1=$2" >> ${BUTGG_CONF}
@@ -177,12 +171,7 @@ run_upload(){
 }
 
 remove_old_dir(){
-    if [ "${OS}" == "CentOS" ] || [ "${OS}" == "Ubuntu" ]
-    then
-        OLD_BACKUP_DAY=`date +%d_%m_%Y -d "-${DAY_REMOVE} day"`
-    else
-        OLD_BACKUP_DAY=`date -v-${DAY_REMOVE}d +%d_%m_%Y`
-    fi
+    OLD_BACKUP_DAY=`date -v-${DAY_REMOVE}d +%d_%m_%Y`
     OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
     if [ "${OLD_BACKUP_ID}" != "" ]
     then

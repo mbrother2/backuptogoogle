@@ -36,37 +36,30 @@ change_color(){
 check_md5sum(){
     curl -o $2 ${GITHUB_LINK}/$1
     ORIGIN_MD5=`curl -s ${GITHUB_LINK}/MD5SUM | grep $1 | awk '{print $1}'`
-    if [ "${OS}" == "CentOS" ] || [ "${OS}" == "Ubuntu" ]
-    then
-        LOCAL_MD5=`md5sum $2 | awk '{print $1}'`
-    else
-        LOCAL_MD5=`md5 $2 | awk '{print $4}'`
-    fi
+    LOCAL_MD5=`md5 $2 | awk '{print $4}'`
     if [ "${ORIGIN_MD5}" == "${LOCAL_MD5}" ]
     then
         show_write_log "Check md5sum for file $1 successful"
     else
-        show_write_log "`change_color red [CHECKS][FAIL]` Can not verify md5sum for file $1. Exit!"
+        show_write_log "`change_color red [CHECKS][FAIL]` Can not verify md5 for file $1. Exit!"
         exit 1
     fi
 }
 
 # Check log file
-check_log_file(){
+check_log_file(){    
     if [ ! -f ${BUTGG_CONF} ]
     then
-        LOG_FILE=${DF_LOG_FILE}
+        LOG_FILE=${DF_LOG_FILE}        
     else
         LOG_FILE=`cat ${BUTGG_CONF} | grep "^LOG_FILE" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         if [ "${LOG_FILE}" == "" ]
         then
             LOG_FILE=${DF_LOG_FILE}
-            show_write_log "---"
-            show_write_log "`change_color yellow [WARNING]` LOG_FILE does not exist. Use default config"
-        else
-            show_write_log "---"
         fi
     fi
+    create_dir .gdrive
+    create_dir bin
 }
 
 # Write log
@@ -79,25 +72,52 @@ create_dir(){
     if [ ! -d ${HOME}/$1 ]
     then
         mkdir -p ${HOME}/$1
-    fi
-    if [ ! -d ${HOME}/$1 ]
-    then
-        echo "Can not create directory ${HOME}/$1. Exit"
-        exit 1
+        if [ ! -d ${HOME}/$1 ]
+        then
+            echo "Can not create directory ${HOME}/$1. Exit"
+            exit 1
+        else
+            if [ "$1" == ".gdrive" ]
+            then
+                show_write_log "---"
+                show_write_log "Creating necessary directory..."
+            fi
+            show_write_log "Create directory ${HOME}/$1 successful"
+        fi
+    else
+        if [ "$1" == ".gdrive" ]
+        then
+            show_write_log "---"
+            show_write_log "Creating necessary directory..."
+        fi
+        show_write_log "Directory ${HOME}/$1 existed. Skip"
     fi
     echo 1 >> ${HOME}/$1/test.txt
     if [ $? -ne 0 ]
     then
         echo "Can not write to ${HOME}/$1. Exit"
         exit 1
+    else
+        show_write_log "Check write to ${HOME}/$1 successful"
     fi
     rm -f ${HOME}/$1/test.txt
 }
 
-# Prepare setup
-pre_setup(){
-    create_dir bin
-    create_dir .gdrive
+check_package(){
+    which $1
+    if [ $? -ne 0 ]
+    then
+        show_write_log "Command $1 not found. Trying to install $1..."
+        sleep 3
+        ${INSTALL_CM} install -y $1
+        which $1
+        if [ $? -ne 0 ]
+        then
+            show_write_log "Can not install $1 package. Please install $1 manually."
+            exit 1
+        fi
+    fi
+    show_write_log "Package $1 is installed"
 }
 
 # Check network
@@ -122,23 +142,20 @@ check_network(){
 # Detect OS
 detect_os(){
     show_write_log "Checking OS..."
-    if [ -f /etc/redhat-release ]
+    if [ -f /etc/freebsd-update.conf ]
     then
-        OS="CentOS"
-        GO_FILE="go1.12.5.linux-amd64"
-    elif [ -f /usr/bin/lsb_release ]
-    then
-        OS="Ubuntu"
-        GO_FILE="go1.12.5.linux-amd64"
-    elif [ -f /etc/freebsd-update.conf ]
-    then
-        OS="FreeBSD"
+        SYS="BSD"
         GO_FILE="go1.12.5.freebsd-amd64"
+        OS="FreeBSD"     
+        INSTALL_CM="pkg"
     else
         show_write_log "Sorry! We do not support your OS. Exit"
         exit 1
     fi
     show_write_log "OS supported"
+    show_write_log "Checking necessary package..."
+    check_package curl
+    check_package git
 }
 
 # Download file from Github
@@ -152,26 +169,6 @@ download_file(){
 
 # Build GDRIVE_BIN
 build_gdrive(){
-    which git
-    if [ $? -ne 0 ]
-    then
-        echo "Command git not found. Trying to install git..."
-        if [ "${OS}" == "CentOS" ]
-        then
-            yum -y install git
-        elif [ "${OS}" == "Ubuntu" ]
-        then
-            apt-get install git
-        else
-            pkg install -y install git
-        fi
-        which git
-        if [ $? -ne 0 ]
-        then
-            echo "Command git not found. Please install git first."
-            exit 1
-        fi
-    fi
     cd $HOME/bin
     show_write_log "Downloading go from Google..."
     curl -o ${GO_FILE}.tar.gz https://dl.google.com/go/${GO_FILE}.tar.gz
@@ -185,14 +182,8 @@ build_gdrive(){
     echo "https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step"
     read -p " Your Google API client_id: " gg_client_id
     read -p " Your Google API client_secret: " gg_client_secret
-    if [ "${OS}" == "CentOS" ] || [ "${OS}" == "Ubuntu" ]
-    then
-        sed -i "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" $HOME/bin/gdrive/handlers_drive.go
-        sed -i "s#^const ClientSecret =.*#const ClientSecret = \"${gg_client_secret}\"#g" $HOME/bin/gdrive/handlers_drive.go
-    else
-        sed -i ".${TODAY}" "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" $HOME/bin/gdrive/handlers_drive.go
-        sed -i ".${TODAY}" "s#^const ClientSecret =.*#const ClientSecret = \"${gg_client_secret}\"#g" $HOME/bin/gdrive/handlers_drive.go
-    fi
+    sed -i ".${TODAY}" "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" $HOME/bin/gdrive/handlers_drive.go
+    sed -i ".${TODAY}" "s#^const ClientSecret =.*#const ClientSecret = \"${gg_client_secret}\"#g" $HOME/bin/gdrive/handlers_drive.go
     show_write_log "Building gdrive..."
     cd $HOME/bin/gdrive
     $HOME/bin/go/bin/go get github.com/prasmussen/gdrive
@@ -322,7 +313,6 @@ _setup(){
     check_log_file
     if [ -z "${SECOND_OPTION}" ]
     then
-        pre_setup
         check_network
         detect_os
         download_file
@@ -341,13 +331,11 @@ _setup(){
                 setup_credential
                 ;;
             only-build)
-                pre_setup
                 check_network
                 detect_os
                 build_gdrive
                 ;;
             no-build)
-                pre_setup
                 check_network
                 detect_os
                 download_file
@@ -357,7 +345,6 @@ _setup(){
                 show_info
                 ;;
             no-update)
-                pre_setup
                 check_network
                 detect_os
                 build_gdrive
@@ -375,7 +362,6 @@ _setup(){
 
 _update(){
     check_log_file
-    pre_setup
     check_network
     detect_os
     download_file

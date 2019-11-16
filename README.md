@@ -35,7 +35,7 @@ sh butgg.sh --setup
 # Create own Google credential step by step
 https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step
 # Options
-Run command `bash butgg.bash --help`(or `sh butgg.sh --help` on BSD system) to show all options( After install you only need run `butgg.sh --help`(or `sh butgg.sh --help` on BSD system))
+Run command `bash butgg.bash --help`(or `sh butgg.sh --help` on BSD system) to show all options( After install you only need run `butgg.bash --help`(or `butgg.sh --help` on BSD system))
 ```
 butgg.bash - Backup to Google Drive solution
 

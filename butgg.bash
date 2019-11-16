@@ -266,13 +266,20 @@ setup_config(){
 
 # Set up cron backup
 setup_cron(){
+    CHECK_BIN=`cat ${HOME}/.profile | grep -c "${HOME}/bin"`
+    if [ ${CHECK_BIN} -eq 0 ]
+    then
+        echo "PATH=$PATH:$HOME/bin" >> ${HOME}/.profile
+        echo "export PATH" >> ${HOME}/.profile
+        source ${HOME}/.profile
+    fi
     show_write_log "Setting up cron backup..."
     crontab -l > ${CRON_TEMP}
     CHECK_CRON=`cat ${CRON_TEMP} | grep -c "cron_backup.sh"`
     if [ ${CHECK_CRON} -eq 0 ]
     then
         echo "PATH=$PATH" >> ${CRON_TEMP}
-        echo "0 0 * * * sh ${CRON_BACKUP} >/dev/null 2>&1" >> ${CRON_TEMP}
+        echo "0 0 * * * bash ${CRON_BACKUP} >/dev/null 2>&1" >> ${CRON_TEMP}
         crontab ${CRON_TEMP}
         if [ $? -ne 0 ]
         then

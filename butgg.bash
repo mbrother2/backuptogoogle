@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Set variables
 GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"

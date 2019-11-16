@@ -266,16 +266,16 @@ setup_config(){
 
 # Set up cron backup
 setup_cron(){
+    show_write_log "Setting up cron backup..."
     CHECK_BIN=`cat ${HOME}/.profile | grep -c "${HOME}/bin"`
     if [ ${CHECK_BIN} -eq 0 ]
     then
         echo "PATH=$PATH:$HOME/bin" >> ${HOME}/.profile
         echo "export PATH" >> ${HOME}/.profile
         source ${HOME}/.profile
-    fi
-    show_write_log "Setting up cron backup..."
+    fi    
     crontab -l > ${CRON_TEMP}
-    CHECK_CRON=`cat ${CRON_TEMP} | grep -c "cron_backup.sh"`
+    CHECK_CRON=`cat ${CRON_TEMP} | grep -c "cron_backup.bash"`
     if [ ${CHECK_CRON} -eq 0 ]
     then
         echo "PATH=$PATH" >> ${CRON_TEMP}
@@ -322,8 +322,12 @@ show_info(){
         show_write_log "+-----"
 
         echo ""
-        echo " If you get trouble when use butgg.bash please report here:"
-        echo " https://github.com/mbrother2/backuptogoogle/issues"
+        if [ "${OS}" == "Ubuntu" ]
+        then
+            echo "IMPORTANT: Please run command to use butgg: source ${HOME}/.profile "
+        fi
+        echo "If you get trouble when use butgg.bash please report here:"
+        echo "https://github.com/mbrother2/backuptogoogle/issues"
     fi
 }
 

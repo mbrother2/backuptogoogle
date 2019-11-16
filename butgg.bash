@@ -267,7 +267,7 @@ setup_config(){
 # Set up cron backup
 setup_cron(){
     show_write_log "Setting up cron backup..."
-    CHECK_BIN=`cat ${HOME}/.profile | grep -c "${HOME}/bin"`
+    CHECK_BIN=`echo $PATH | grep -c "${HOME}/bin"`
     if [ ${CHECK_BIN} -eq 0 ]
     then
         echo "PATH=$PATH:$HOME/bin" >> ${HOME}/.profile

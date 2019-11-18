@@ -1,3 +1,3 @@
 ##### Your OS version:
-##### Command:
+##### Command: ``
 ##### Detail log:

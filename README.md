@@ -18,8 +18,11 @@ $HOME (/root or /home/$USER)
         └── token_v2.json
 ```
 # OS support(x86_64):
-- **Linux:** CentOS, CloudLinux, Ubuntu, openSUSE
+- **Linux:** CentOS, Ubuntu, openSUSE
 - **BSD:** FreeBSD
+- **Commercial:** CloudLinux
+# Environment
+- Server, VPS, shared hosting
 ---
 # How to use
 **On Linux system:**

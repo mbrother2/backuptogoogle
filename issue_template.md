@@ -1,2 +1,3 @@
 ##### Your OS version:
-##### Your issue:
+##### Command: ``
+##### Detail log:

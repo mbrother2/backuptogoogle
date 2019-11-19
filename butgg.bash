@@ -7,6 +7,7 @@ BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
+DF_GDRIVE_ID="None"
 GDRIVE_BIN="${HOME}/bin/gdrive"
 GDRIVE_TOKEN="${HOME}/.gdrive/token_v2.json"
 CRON_BACKUP="${HOME}/bin/cron_backup.bash"
@@ -237,8 +238,9 @@ setup_credential(){
 # Set up config file
 setup_config(){
     show_write_log "Setting up config file..."
-    read -p " Which directory do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
-    read -p " How many days you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE    
+    read -p " Which directory on your server do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
+    read -p " How many days do you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE
+    read -p " Your Google folder ID(default ${DF_GDRIVE_ID})(Read more https://github.com/mbrother2/backuptogoogle/wiki/Get-Google-folder-ID): " GDRIVE_ID
     if [ -z "${BACKUP_DIR}" ]
     then
         BACKUP_DIR="${DF_BACKUP_DIR}"
@@ -247,9 +249,14 @@ setup_config(){
     then
         DAY_REMOVE="${DF_DAY_REMOVE}"
     fi
+    if [ -z "${GDRIVE_ID}" ]
+    then
+        GDRIVE_ID="${DF_GDRIVE_ID}"
+    fi
     echo "LOG_FILE=${LOG_FILE}" > ${BUTGG_CONF}
     echo "BACKUP_DIR=${BACKUP_DIR}" >> ${BUTGG_CONF}
     echo "DAY_REMOVE=${DAY_REMOVE}" >> ${BUTGG_CONF}
+    echo "GDRIVE_ID=${GDRIVE_ID}" >> ${BUTGG_CONF}
     if [ $? -ne 0 ]
     then
         show_write_log "`change_color red [ERROR]` Can not write config to file ${BUTGG_CONF}. Please check permission of this file. Exit"
@@ -305,6 +312,7 @@ show_info(){
         show_write_log "| SUCESSFUL! Your information:"
         show_write_log "| Backup dir      : ${BACKUP_DIR}"
         show_write_log "| Keep backup     : ${DAY_REMOVE} days"
+        show_write_log "| Google folder ID: ${GDRIVE_ID}"
         show_write_log "| Config file     : ${BUTGG_CONF}"
         show_write_log "+-----"
     else
@@ -314,7 +322,8 @@ show_info(){
         show_write_log "| Config file     : ${BUTGG_CONF}"
         show_write_log "| Log file        : ${LOG_FILE}"
         show_write_log "| Keep backup     : ${DAY_REMOVE} days"
-        show_write_log "| butgg.bash file   : ${SETUP_FILE}"
+        show_write_log "| Google folder ID: ${GDRIVE_ID}"
+        show_write_log "| butgg.bash file : ${SETUP_FILE}"
         show_write_log "| Cron backup file: ${CRON_BACKUP}"
         show_write_log "| Gdrive bin file : ${GDRIVE_BIN}"
         show_write_log "| Cron backup     : ${SHOW_CRON}"

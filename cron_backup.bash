@@ -6,6 +6,7 @@ GDRIVE_BIN="${HOME}/bin/gdrive"
 DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
+DF_GDRIVE_ID="None"
 FIRST_OPTION=$1
 
 # Date variables
@@ -96,13 +97,16 @@ get_config(){
         check_config LOG_FILE ${DF_LOG_FILE}
         check_config BACKUP_DIR ${DF_BACKUP_DIR}
         check_config DAY_REMOVE ${DF_DAY_REMOVE}
+        check_config GDRIVE_ID ${DF_GDRIVE_ID}
     else
         LOG_FILE=`cat ${BUTGG_CONF} | grep "^LOG_FILE"   | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config LOG_FILE ${DF_LOG_FILE} ${LOG_FILE}
         BACKUP_DIR=`cat ${BUTGG_CONF} | grep "^BACKUP_DIR" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
-        check_config BACKUP_DIR ${DF_BACKUP_DIR} ${BACKUP_DIR}           
+        check_config BACKUP_DIR ${DF_BACKUP_DIR} ${BACKUP_DIR}         
         DAY_REMOVE=`cat ${BUTGG_CONF} | grep "^DAY_REMOVE" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
-        check_config DAY_REMOVE ${DF_DAY_REMOVE} ${DAY_REMOVE} 
+        check_config DAY_REMOVE ${DF_DAY_REMOVE} ${DAY_REMOVE}
+        GDRIVE_ID=`cat ${BUTGG_CONF} | grep "^GDRIVE_ID" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
+        check_config GDRIVE_ID ${DF_GDRIVE_ID} ${GDRIVE_ID}
     fi
 }
 
@@ -133,14 +137,37 @@ check_info(){
 # Run upload to Google Drive
 run_upload(){
     show_write_log "Start upload to Google Drive..."
-    CHECK_BACKUP_DIR=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep -c "${TODAY}"`
+    if [ "${GDRIVE_ID}" == "None" ]
+    then
+        CHECK_BACKUP_DIR=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep -c "${TODAY}"`
+    else
+        show_write_log "Checking Google folder ID..."
+        CHECK_BACKUP_DIR=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents" -m 100000 --name-width 0 | grep -c "${TODAY}"`
+        if [ $? -ne 0 ]
+        then
+            show_write_log "`change_color yellow [CHECKS][FAIL]` Google folder ID error, please check again. Exit"
+            exit 1
+        else
+            show_write_log "Check Google folder ID successful"
+        fi
+    fi   
     if [ ${CHECK_BACKUP_DIR} -eq 0 ]
     then
         show_write_log "Directory ${TODAY} does not exist. Creating..."
-        ID_DIR=`${GDRIVE_BIN} mkdir ${TODAY} | awk '{print $2}'`
+        if [ "${GDRIVE_ID}" == "None" ]
+        then
+            ID_DIR=`${GDRIVE_BIN} mkdir ${TODAY} | awk '{print $2}'`
+        else
+            ID_DIR=`${GDRIVE_BIN} mkdir -p ${GDRIVE_ID} ${TODAY} | awk '{print $2}'`
+        fi
     else
         show_write_log "Directory ${TODAY} existed. Skipping..."
-        ID_DIR=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
+        if [ "${GDRIVE_ID}" == "None" ]
+        then
+            ID_DIR=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
+        else
+            ID_DIR=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents" -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
+        fi
     fi
     if [ ${#ID_DIR} -ne 33 ]
     then
@@ -172,11 +199,21 @@ run_upload(){
 
 remove_old_dir(){
     OLD_BACKUP_DAY=`date +%d_%m_%Y -d "-${DAY_REMOVE} day"`
-    OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+    if [ "${GDRIVE_ID}" == "None" ]
+    then
+        OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+    else
+        OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+    fi
     if [ "${OLD_BACKUP_ID}" != "" ]
     then
         ${GDRIVE_BIN} delete -r ${OLD_BACKUP_ID}
-        OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+        if [ "${GDRIVE_ID}" == "None" ]
+        then
+            OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+        else
+            OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+        fi
         if [[ "${OLD_BACKUP_ID}" == "" ]]
         then
             show_write_log "`change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}"

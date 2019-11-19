@@ -20,7 +20,7 @@ $HOME (/root or /home/$USER)
 # OS support(x86_64):
 - **Linux:** CentOS, Ubuntu, openSUSE
 - **BSD:** FreeBSD
-- **Commercial:** CloudLinux
+- **Commercial:** CloudLinux, SUSE Linux Enterprise
 # Environment
 - Server, VPS, shared hosting
 ---

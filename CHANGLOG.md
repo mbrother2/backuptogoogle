@@ -1,3 +1,6 @@
+#### butgg 1.1.0 (19/11/2019) New feature
+[New feature] Add support upload to specific diectory on Google Drive
+
 #### butgg 1.0.1 (19/11/2019) Add OS
 [Add OS] Support SUSE Linux Enterprise
 

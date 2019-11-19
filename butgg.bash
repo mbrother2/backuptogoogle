@@ -152,7 +152,7 @@ detect_os(){
         elif [ "${OS}" == "Ubuntu" ]
         then
             INSTALL_CM="apt"
-        elif [ "${OS}" == "openSUSE" ]
+        elif [[ "${OS}" == "openSUSE" ]] || [[ "${OS}" == "SLES" ]]
         then
             INSTALL_CM="zypper"
         else
@@ -400,7 +400,7 @@ _uninstall(){
         show_write_log "Remove all butgg.bash scripts successful"
     fi
     read -p " Do you want remove ${HOME}/.gdrive directory?(y/n) " REMOVE_GDRIVE_DIR
-    if [ "${REMOVE_GDRIVE_DIR}" == "y" ] || [ "${REMOVE_GDRIVE_DIR}" == "Y" ]
+    if [[ "${REMOVE_GDRIVE_DIR}" == "y" ]] || [[ "${REMOVE_GDRIVE_DIR}" == "Y" ]]
     then
         rm -rf ${HOME}/.gdrive
         if [ $? -ne 0 ]

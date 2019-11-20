@@ -142,10 +142,10 @@ run_upload(){
         CHECK_BACKUP_DIR=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep -c "${TODAY}"`
     else
         show_write_log "Checking Google folder ID..."
-        CHECK_GDRIVE_ID=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents" -m 100000 --name-width 0`
+        CHECK_GDRIVE_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep " dir " | awk '{print $1}' | grep -c "^${GDRIVE_ID}$"`
         if [ $? -ne 0 ]
         then
-            show_write_log "`change_color yellow [CHECKS][FAIL]` Google folder ID error, please check again. Exit"
+            show_write_log "`change_color yellow [CHECKS][FAIL]` Can not find Google folder ID ${GDRIVE_ID} . Exit"
             exit 1
         else
             show_write_log "Check Google folder ID successful"

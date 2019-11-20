@@ -150,7 +150,7 @@ run_upload(){
         else
             show_write_log "Check Google folder ID successful"
         fi
-        CHECK_BACKUP_DIR=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents" -m 100000 --name-width 0 | grep -c "${TODAY}"`
+        CHECK_BACKUP_DIR=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents trashed = false" -m 100000 --name-width 0 | grep -c "${TODAY}"`
     fi
     if [ ${CHECK_BACKUP_DIR} -eq 0 ]
     then
@@ -167,7 +167,7 @@ run_upload(){
         then
             ID_DIR=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
         else
-            ID_DIR=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents" -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
+            ID_DIR=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents and trashed = false" -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
         fi
     fi
     if [ ${#ID_DIR} -ne 33 ]
@@ -204,7 +204,7 @@ remove_old_dir(){
     then
         OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
     else
-        OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+        OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents and trashed = false" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
     fi
     if [ "${OLD_BACKUP_ID}" != "" ]
     then
@@ -213,7 +213,7 @@ remove_old_dir(){
         then
             OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
         else
-            OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+            OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents and trashed = false" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
         fi
         if [ "${OLD_BACKUP_ID}" == "" ]
         then

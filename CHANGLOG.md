@@ -1,5 +1,6 @@
 #### butgg 1.1.1 (20/11/2019) Improvement
 [Improvement] Improve check Google folder ID
+[Improvement] Improve detect Google folder upload ID
 
 #### butgg 1.1.0 (19/11/2019) New feature
 [New feature] Add support upload to specific diectory on Google Drive

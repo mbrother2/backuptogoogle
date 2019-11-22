@@ -3,7 +3,7 @@
 - Complie gdrive (https://github.com/gdrive-org/gdrive) on your server with your Google credential
 - Create cron auto backup
 - Auto remove old backup on Google Drive
-- Run upload from to Google Drive whenever you want
+- Run upload from your backup directory to Google Drive whenever you want
 - Detail log
 # Structure
 ```

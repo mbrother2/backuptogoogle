@@ -2,6 +2,7 @@
 # What can this script do?
 - Complie gdrive (https://github.com/gdrive-org/gdrive) on your server with your Google credential
 - Create cron auto backup
+- Send error email if upload to Google Drive fail
 - Auto remove old backup on Google Drive
 - Run upload from your backup directory to Google Drive whenever you want
 - Detail log
@@ -15,6 +16,7 @@ $HOME (/root or /home/$USER)
    └── .gdrive
         ├── butgg.conf
         ├── butgg.log
+        ├── detail.log (exist if config email & upload fail)
         └── token_v2.json
 ```
 # OS support(x86_64):
@@ -35,8 +37,10 @@ bash butgg.bash --setup
 curl -o butgg.sh https://raw.githubusercontent.com/mbrother2/backuptogoogle/master/butgg.sh
 sh butgg.sh --setup
 ```
-# Create own Google credential step by step
-https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step
+# Wiki
+##### [Create own Google credential step by step](https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step)
+##### [Get Google folder ID](https://github.com/mbrother2/backuptogoogle/wiki/Get-Google-folder-ID)
+##### [Turn on 2 Step Verification & create app's password for Google email](https://github.com/mbrother2/backuptogoogle/wiki/Turn-on-2-Step-Verification-&-create-app's-password-for-Google-email)
 # Change log
 https://github.com/mbrother2/backuptogoogle/blob/master/CHANGLOG.md
 # Options

@@ -2,11 +2,15 @@
 
 # Setup variables
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
+BUTGG_DEBUG="${HOME}/.gdrive/detail.log"
 GDRIVE_BIN="${HOME}/bin/gdrive"
 DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
 DF_GDRIVE_ID="None"
+DF_EMAIL_USER="None"
+DF_EMAIL_PASS="None"
+DF_EMAIL_TO="None"
 FIRST_OPTION=$1
 
 # Date variables
@@ -98,15 +102,24 @@ get_config(){
         check_config BACKUP_DIR ${DF_BACKUP_DIR}
         check_config DAY_REMOVE ${DF_DAY_REMOVE}
         check_config GDRIVE_ID ${DF_GDRIVE_ID}
+        check_config EMAIL_USER ${DF_EMAIL_USER}
+        check_config EMAIL_PASS ${DF_EMAIL_PASS}
+        check_config EMAIL_TO ${DF_EMAIL_TO}
     else
         LOG_FILE=`cat ${BUTGG_CONF} | grep "^LOG_FILE"   | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config LOG_FILE ${DF_LOG_FILE} ${LOG_FILE}
         BACKUP_DIR=`cat ${BUTGG_CONF} | grep "^BACKUP_DIR" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
-        check_config BACKUP_DIR ${DF_BACKUP_DIR} ${BACKUP_DIR}           
+        check_config BACKUP_DIR ${DF_BACKUP_DIR} ${BACKUP_DIR}
         DAY_REMOVE=`cat ${BUTGG_CONF} | grep "^DAY_REMOVE" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config DAY_REMOVE ${DF_DAY_REMOVE} ${DAY_REMOVE}
         GDRIVE_ID=`cat ${BUTGG_CONF} | grep "^GDRIVE_ID" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config GDRIVE_ID ${DF_GDRIVE_ID} ${GDRIVE_ID}
+        EMAIL_USER=`cat ${BUTGG_CONF} | grep "^EMAIL_USER" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
+        check_config EMAIL_USER ${DF_EMAIL_USER} ${EMAIL_USER}
+        EMAIL_PASS=`cat ${BUTGG_CONF} | grep "^EMAIL_PASS" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
+        check_config EMAIL_PASS ${DF_EMAIL_PASS} ${EMAIL_PASS}
+        EMAIL_TO=`cat ${BUTGG_CONF} | grep "^EMAIL_TO" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
+        check_config EMAIL_TO ${DF_EMAIL_TO} ${EMAIL_TO}
     fi
 }
 
@@ -115,12 +128,14 @@ check_info(){
     if [ ! -d "${BACKUP_DIR}" ]
     then       
         show_write_log "`change_color red [CHECKS][FAIL]` Directory ${BACKUP_DIR} does not exist. Exit"
+        send_error_email "butgg [CHECKS][FAIL]" "Directory ${BACKUP_DIR} does not exist"
         exit 1
     fi
     if [ ! -f ${HOME}/.gdrive/token_v2.json ]
     then
         show_write_log "`change_color red [CHECKS][FAIL]` File ${HOME}/.gdrive/token_v2.json does not exist. Exit"
         show_write_log "Please run command: '${GDRIVE_BIN} about' to create your Google token for gdrive"
+        send_error_email "butgg [CHECKS][FAIL]" "File ${HOME}/.gdrive/token_v2.json does not exist"
         exit 1
     else
         echo "\n" | ${GDRIVE_BIN} list >/dev/null
@@ -129,10 +144,34 @@ check_info(){
             echo ""
             show_write_log "`change_color red [CHECKS][FAIL]` File ${HOME}/.gdrive/token_v2.json exists but can not verify Google token for gdrive. Exit"
             show_write_log "Please run command: '${GDRIVE_BIN} about' to recreate your Google token for gdrive"
+            show_write_log "Please run command: 'butgg.bash --setup credential' to recreate your Google token for gdrive"
+            send_error_email "butgg [CHECKS][FAIL]" "File ${HOME}/.gdrive/token_v2.json exists but can not verify Google token for gdrive"
             exit 1
         fi
     fi
 }
+
+# Send error email
+send_error_email(){
+    if [ "${EMAIL_USER}" == "None" ]
+    then
+        show_write_log "`change_color yellow [WARNING]` Email not config, do not send error email"
+    else
+        show_write_log "Sending error email..."
+        curl -s --url "smtp://smtp.gmail.com:587" --ssl-reqd --mail-from "${EMAIL_USER}" --mail-rcpt "${EMAIL_TO}" --user "${EMAIL_USER}:${EMAIL_PASS}" -T <(echo -e "From: ${EMAIL_USER}\nTo: ${EMAIL_TO}\nSubject: $1\n\n $2")
+        if [ $? -ne 0 ]
+        then
+            echo `date "+[ %d/%m/%Y %H:%M:%S ]"` "---" >> ${BUTGG_DEBUG}
+            curl -v --url "smtp://smtp.gmail.com:587" --ssl-reqd --mail-from "${EMAIL_USER}" --mail-rcpt "${EMAIL_TO}" --user "${EMAIL_USER}:${EMAIL_PASS}" -T <(echo -e "From: ${EMAIL_USER}\nTo: ${EMAIL_TO}\nSubject: $1\n\n $2") --stderr ${BUTGG_DEBUG}_${TODAY}
+            cat ${BUTGG_DEBUG}_${TODAY} >> ${BUTGG_DEBUG}
+            rm -f ${BUTGG_DEBUG}_${TODAY}
+            show_write_log "`change_color red [EMAIL][FAIL]` Can not send error email. See ${BUTGG_DEBUG} for more detail"            
+        else
+            show_write_log "Send error email successful"
+        fi
+    fi
+}
+
 
 # Run upload to Google Drive
 run_upload(){
@@ -146,6 +185,7 @@ run_upload(){
         if [ $? -ne 0 ]
         then
             show_write_log "`change_color yellow [CHECKS][FAIL]` Can not find Google folder ID ${GDRIVE_ID} . Exit"
+            send_error_email "butgg [CHECKS][FAIL]" "Can not find Google folder ID ${GDRIVE_ID}"
             exit 1
         else
             show_write_log "Check Google folder ID successful"
@@ -173,6 +213,7 @@ run_upload(){
     if [ ${#ID_DIR} -ne 33 ]
     then
         show_write_log "`change_color red [CREATE][FAIL]` Can not create directory ${TODAY}"
+        send_error_email "butgg [CREATE][FAIL]" "Can not create directory ${TODAY}"
         exit 1
     elif [ ${CHECK_BACKUP_DIR} -eq 0 ]
     then
@@ -189,7 +230,7 @@ run_upload(){
         if [ "${UPLOAD_FILE}" == *"Error"* ] || [ "${UPLOAD_FILE}" == *"Fail"* ]
         then
             show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}"
-            show_write_log "Something wrong!!! Exit."
+            send_error_email "butgg [UPLOAD][FAIL]" "Can not upload backup file! ${UPLOAD_FILE}"
             exit
         else
             show_write_log "`change_color green [UPLOAD]` Uploaded ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}"
@@ -220,6 +261,7 @@ remove_old_dir(){
             show_write_log "`change_color green [REMOVE]` Removed directory ${OLD_BACKUP_DAY}"
         else
             show_write_log "`change_color red [REMOVE][FAIL]` Directory ${OLD_BACKUP_DAY} exists but can not remove!"
+            send_error_email "butgg [REMOVE][FAIL]" "Directory ${OLD_BACKUP_DAY} exists but can not remove!"
         fi
     else
         show_write_log "Directory ${OLD_BACKUP_DAY} does not exist. Nothing need remove!"

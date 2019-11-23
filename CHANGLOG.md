@@ -1,3 +1,6 @@
+#### butgg 1.2.0 (23/11/2019) New feature
+- [New feature] Send error email if upload to Google Drive fail
+
 #### butgg 1.1.1 (20/11/2019) Improvement
 - [Improvement] Improve check Google folder ID
 - [Improvement] Improve detect Google folder upload ID

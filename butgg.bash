@@ -1,6 +1,3 @@
-#!/bin/bash
-
-# Set variables
 GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
 GO_FILE="go1.12.5.linux-amd64"
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
@@ -8,11 +5,15 @@ DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
 DF_GDRIVE_ID="None"
+DF_EMAIL_USER="None"
+DF_EMAIL_PASS="None"
+DF_EMAIL_TO="None"
 GDRIVE_BIN="${HOME}/bin/gdrive"
 GDRIVE_TOKEN="${HOME}/.gdrive/token_v2.json"
 CRON_BACKUP="${HOME}/bin/cron_backup.bash"
 SETUP_FILE="${HOME}/bin/butgg.bash"
 CRON_TEMP="${HOME}/.gdrive/old_cron"
+FIRST_OPTION=$1
 SECOND_OPTION=$2
 
 # Date variables
@@ -122,6 +123,28 @@ check_package(){
     show_write_log "Package $1 is installed"
 }
 
+# Write config
+write_config(){
+    if [ "$3" == "" ]
+    then
+        VAR=$1
+        eval "$VAR"="$2"
+        if [ -f ${BUTGG_CONF} ]
+        then
+            sed -i "/^$1/d" ${BUTGG_CONF}
+        fi
+        echo "$1=$2" >> ${BUTGG_CONF}
+    else
+        VAR=$1
+        eval "$VAR"="$3"
+        if [ -f ${BUTGG_CONF} ]
+        then
+            sed -i "/^$1/d" ${BUTGG_CONF}
+        fi
+        echo "$1=$3" >> ${BUTGG_CONF}
+    fi
+}
+
 # Check network
 check_network(){
     show_write_log "Cheking network..."
@@ -167,7 +190,10 @@ detect_os(){
     show_write_log "OS supported"
     show_write_log "Checking necessary package..."
     check_package curl
-    check_package git
+    if [ "${FIRST_OPTION}" != "--update" ]
+    then
+        check_package git
+    fi
 }
 
 # Download file from Github
@@ -190,12 +216,13 @@ build_gdrive(){
     rm -rf gdrive
     git clone https://github.com/gdrive-org/gdrive.git
     show_write_log "Build your own gdrive!"
-    echo "Please go to URL to create your own Google credential:"
-    echo "https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step"
+    echo ""
+    echo "Read more: https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step"
     read -p " Your Google API client_id: " gg_client_id
     read -p " Your Google API client_secret: " gg_client_secret
     sed -i "s#^const ClientId =.*#const ClientId = \"${gg_client_id}\"#g" $HOME/bin/gdrive/handlers_drive.go
     sed -i "s#^const ClientSecret =.*#const ClientSecret = \"${gg_client_secret}\"#g" $HOME/bin/gdrive/handlers_drive.go
+    echo ""
     show_write_log "Building gdrive..."
     cd $HOME/bin/gdrive
     $HOME/bin/go/bin/go get github.com/prasmussen/gdrive
@@ -238,25 +265,29 @@ setup_credential(){
 # Set up config file
 setup_config(){
     show_write_log "Setting up config file..."
+    echo ""
     read -p " Which directory on your server do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
     read -p " How many days do you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE
-    read -p " Your Google folder ID(default ${DF_GDRIVE_ID})(Read more https://github.com/mbrother2/backuptogoogle/wiki/Get-Google-folder-ID): " GDRIVE_ID
-    if [ -z "${BACKUP_DIR}" ]
+    echo ""
+    echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/Get-Google-folder-ID"
+    read -p " Your Google folder ID(default ${DF_GDRIVE_ID}): " GDRIVE_ID
+    echo ""
+    echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/Turn-on-2-Step-Verification-&-create-app's-password-for-Google-email"
+    read -p " Do you want to send email if upload error(default no)(y/n): " SEND_EMAIL
+    if [ "${SEND_EMAIL}" == "y" ]
     then
-        BACKUP_DIR="${DF_BACKUP_DIR}"
+        read -p " Your Google email user name: " EMAIL_USER
+        read -p " Your Google email password: " EMAIL_PASS
+        read -p " Which email will be receive notify?: " EMAIL_TO
     fi
-    if [ -z "${DAY_REMOVE}" ]
-    then
-        DAY_REMOVE="${DF_DAY_REMOVE}"
-    fi
-    if [ -z "${GDRIVE_ID}" ]
-    then
-        GDRIVE_ID="${DF_GDRIVE_ID}"
-    fi
+    echo ""
     echo "LOG_FILE=${LOG_FILE}" > ${BUTGG_CONF}
-    echo "BACKUP_DIR=${BACKUP_DIR}" >> ${BUTGG_CONF}
-    echo "DAY_REMOVE=${DAY_REMOVE}" >> ${BUTGG_CONF}
-    echo "GDRIVE_ID=${GDRIVE_ID}" >> ${BUTGG_CONF}
+    write_config BACKUP_DIR "${DF_BACKUP_DIR}" "${BACKUP_DIR}"
+    write_config DAY_REMOVE "${DF_DAY_REMOVE}" "${DAY_REMOVE}"
+    write_config GDRIVE_ID  "${DF_GDRIVE_ID}"  "${GDRIVE_ID}"
+    write_config EMAIL_USER "${DF_EMAIL_USER}" "${EMAIL_USER}"
+    write_config EMAIL_PASS "${DF_EMAIL_PASS}" "${EMAIL_PASS}" 
+    write_config EMAIL_TO   "${DF_EMAIL_TO}"   "${EMAIL_TO}"
     if [ $? -ne 0 ]
     then
         show_write_log "`change_color red [ERROR]` Can not write config to file ${BUTGG_CONF}. Please check permission of this file. Exit"
@@ -313,6 +344,9 @@ show_info(){
         show_write_log "| Backup dir      : ${BACKUP_DIR}"
         show_write_log "| Keep backup     : ${DAY_REMOVE} days"
         show_write_log "| Google folder ID: ${GDRIVE_ID}"
+        show_write_log "| Your email      : ${EMAIL_USER}"
+        show_write_log "| Email password  : ${EMAIL_PASS}"
+        show_write_log "| Email notify    : ${EMAIL_TO}"
         show_write_log "| Config file     : ${BUTGG_CONF}"
         show_write_log "+-----"
     else
@@ -323,6 +357,9 @@ show_info(){
         show_write_log "| Log file        : ${LOG_FILE}"
         show_write_log "| Keep backup     : ${DAY_REMOVE} days"
         show_write_log "| Google folder ID: ${GDRIVE_ID}"
+        show_write_log "| Your email      : ${EMAIL_USER}"
+        show_write_log "| Email password  : ${EMAIL_PASS}"
+        show_write_log "| Email notify    : ${EMAIL_TO}"
         show_write_log "| butgg.bash file : ${SETUP_FILE}"
         show_write_log "| Cron backup file: ${CRON_BACKUP}"
         show_write_log "| Gdrive bin file : ${GDRIVE_BIN}"

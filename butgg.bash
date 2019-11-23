@@ -1,3 +1,6 @@
+#!/bin/bash
+
+# Setup variables
 GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
 GO_FILE="go1.12.5.linux-amd64"
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"

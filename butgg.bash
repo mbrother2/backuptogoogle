@@ -176,7 +176,7 @@ detect_os(){
         if [ "${OS}" == "CentOS" ]
         then
             INSTALL_CM="yum"
-        elif [ "${OS}" == "Ubuntu" ]
+        elif [[ "${OS}" == "Ubuntu" ]] || [[ "${OS}" == "Debian" ]]
         then
             INSTALL_CM="apt"
         elif [[ "${OS}" == "openSUSE" ]] || [[ "${OS}" == "SLES" ]]
@@ -371,7 +371,7 @@ show_info(){
         show_write_log "+-----"
 
         echo ""
-        if [ "${OS}" == "Ubuntu" ]
+        if [[ "${OS}" == "Ubuntu" ]] || [[ "${OS}" == "Debian" ]]
         then
             echo "IMPORTANT: Please run command to use butgg: source ${HOME}/.profile "
         fi

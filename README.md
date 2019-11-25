@@ -20,7 +20,7 @@ $HOME (/root or /home/$USER)
         └── token_v2.json
 ```
 # OS support(x86_64):
-- **Linux:** CentOS, Ubuntu, openSUSE
+- **Linux:** CentOS, Debian, Ubuntu, openSUSE
 - **BSD:** FreeBSD
 - **Commercial:** CloudLinux, SUSE Linux Enterprise
 # Environment

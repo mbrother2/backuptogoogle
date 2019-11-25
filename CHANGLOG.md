@@ -1,3 +1,6 @@
+#### butgg 1.2.1 (25/11/2019) Add support
+- [Add support] Support Debian
+
 #### butgg 1.2.0 (23/11/2019) New feature
 - [New feature] Send error email if upload to Google Drive fail
 

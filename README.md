@@ -23,6 +23,7 @@ $HOME (/root or /home/$USER)
 - **Linux:** CentOS, Debian, Ubuntu, openSUSE
 - **BSD:** FreeBSD
 - **Commercial:** CloudLinux, SUSE Linux Enterprise
+- **Windows:** Build gdrive only
 # Environment
 - Server, VPS, shared hosting
 ---
@@ -37,6 +38,14 @@ bash butgg.bash --setup
 curl -o butgg.sh https://raw.githubusercontent.com/mbrother2/backuptogoogle/master/butgg.sh
 sh butgg.sh --setup
 ```
+**On Windows system:**
+1. Install git for windows https://git-scm.com/download/win
+2. Build gdrive on Git bash terminal:
+```
+curl -o build_gdrive_windows.bash https://raw.githubusercontent.com/mbrother2/backuptogoogle/master/build_gdrive_windows.bash
+bash build_gdrive_windows.bash
+```
+
 # Wiki
 ##### [Create own Google credential step by step](https://github.com/mbrother2/backuptogoogle/wiki/Create-own-Google-credential-step-by-step)
 ##### [Get Google folder ID](https://github.com/mbrother2/backuptogoogle/wiki/Get-Google-folder-ID)

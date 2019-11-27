@@ -148,25 +148,6 @@ write_config(){
     fi
 }
 
-# Check network
-check_network(){
-    show_write_log "Cheking network..."
-    if ping -c 1 raw.githubusercontent.com > /dev/null
-    then
-        show_write_log "Connect Github successful"
-    else
-        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
-        exit 1
-    fi
-    if ping -c 1 dl.google.com > /dev/null
-    then
-        show_write_log "Connect Google successful"
-    else
-        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
-        exit 1
-    fi
-}
-
 # Detect OS
 detect_os(){
     show_write_log "Checking OS..."
@@ -196,6 +177,27 @@ detect_os(){
     if [ "${FIRST_OPTION}" != "--update" ]
     then
         check_package git
+    fi
+}
+
+# Check network
+check_network(){
+    show_write_log "Cheking network..."
+    curl -sI raw.githubusercontent.com >/dev/null
+    if [ $? -eq 0 ]
+    then
+        show_write_log "Connect Github successful"
+    else
+        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
+        exit 1
+    fi
+    curl -sI 1 dl.google.com >/dev/null
+    if [ $? -eq 0 ]
+    then
+        show_write_log "Connect Google successful"
+    else
+        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
+        exit 1
     fi
 }
 
@@ -384,8 +386,8 @@ _setup(){
     check_log_file
     if [ -z "${SECOND_OPTION}" ]
     then
-        check_network
         detect_os
+        check_network
         download_file
         build_gdrive
         setup_credential
@@ -402,13 +404,13 @@ _setup(){
                 setup_credential
                 ;;
             only-build)
-                check_network
                 detect_os
+                check_network
                 build_gdrive
                 ;;
             no-build)
-                check_network
                 detect_os
+                check_network
                 download_file
                 setup_credential
                 setup_config
@@ -416,8 +418,8 @@ _setup(){
                 show_info
                 ;;
             no-update)
-                check_network
                 detect_os
+                check_network
                 build_gdrive
                 setup_credential
                 setup_config
@@ -433,8 +435,8 @@ _setup(){
 
 _update(){
     check_log_file
-    check_network
     detect_os
+    check_network
     download_file
 }
 

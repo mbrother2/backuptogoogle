@@ -1,3 +1,6 @@
+#### butgg 1.2.2 (27/11/2019) Improvement
+- [Improvement] Improve checking network to connect to Github & Google
+
 #### butgg 1.2.1 (25/11/2019) Add support
 - [Add support] Support Debian
 

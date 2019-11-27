@@ -196,7 +196,7 @@ check_network(){
     then
         show_write_log "Connect Google successful"
     else
-        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
+        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Google, please check your network. Exit"
         exit 1
     fi
 }

@@ -3,6 +3,7 @@
 # Setup variables
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 BUTGG_DEBUG="${HOME}/.gdrive/detail.log"
+BUTGG_EXCLUDE="${HOME}/.gdrive/exclude.list"
 GDRIVE_BIN="${HOME}/bin/gdrive"
 DF_BACKUP_DIR="${HOME}/backup"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
@@ -223,16 +224,25 @@ run_upload(){
     BACKUP_DIR=`realpath ${BACKUP_DIR}`
     for i in $(ls -1 ${BACKUP_DIR})
     do
-        check_file_type "${BACKUP_DIR}/$i"            
-        show_write_log "Uploading ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}..."                
-        UPLOAD_FILE=`${GDRIVE_BIN} upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
-        if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
+        check_file_type "${BACKUP_DIR}/$i"
+        if [ -f "${BUTGG_EXCLUDE}" ]
         then
-            show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}. Exit"
-            send_error_email "butgg [UPLOAD][FAIL]" "Can not upload backup file! ${UPLOAD_FILE}"
-            exit
-        else
-            show_write_log "`change_color green [UPLOAD]` Uploaded ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}"
+            CHECK_EXCLUDE=`cat "${BUTGG_EXCLUDE}" | grep -c "^$i$"`
+            if [ ${CHECK_EXCLUDE} -ne 0 ]
+            then
+                show_write_log "`change_color green [INFO]` ${FILE_TYPE^} $i in list exclude. Skip upload"
+            else
+                show_write_log "Uploading ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}..."
+                UPLOAD_FILE=`${GDRIVE_BIN} upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
+                if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
+                then
+                    show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}. Exit"
+                    send_error_email "butgg [UPLOAD][FAIL]" "Can not upload backup file! ${UPLOAD_FILE}"
+                    exit
+                else
+                    show_write_log "`change_color green [UPLOAD]` Uploaded ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}"
+                fi
+            fi
         fi
     done
     show_write_log "Finish! All files and directories in ${BACKUP_DIR} are uploaded to Google Drive in directory ${TODAY}"

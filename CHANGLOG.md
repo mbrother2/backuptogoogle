@@ -1,3 +1,6 @@
+#### butgg 1.2.3 (02/12/2019) New feature
+- [New feature] Exclude file/directory in cron backup
+
 #### butgg 1.2.2 (27/11/2019) Improvement
 - [Improvement] Improve checking network to connect to Github & Google
 

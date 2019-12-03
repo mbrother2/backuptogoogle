@@ -1,4 +1,7 @@
-#### butgg 1.2.3 (02/12/2019) New feature
+#### butgg 1.3.1 (03/12/2019) Fix bug
+- [Fix bug] Run upload normaly if file exclude.list does not exist
+
+#### butgg 1.3.0 (02/12/2019) New feature
 - [New feature] Exclude file/directory in cron backup
 
 #### butgg 1.2.2 (27/11/2019) Improvement

@@ -232,18 +232,18 @@ run_upload(){
             if [ ${CHECK_EXCLUDE} -ne 0 ]
             then
                 show_write_log "`change_color green [INFO]` ${FILE_TYPE^} $i in list exclude. Skip upload"
-            else
-                show_write_log "Uploading ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}..."
-                UPLOAD_FILE=`${GDRIVE_BIN} upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
-                if [ "${UPLOAD_FILE}" == *"Error"* ] || [ "${UPLOAD_FILE}" == *"Fail"* ]
-                then
-                    show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}"
-                    send_error_email "butgg [UPLOAD][FAIL]" "Can not upload backup file! ${UPLOAD_FILE}"
-                    exit
-                else
-                    show_write_log "`change_color green [UPLOAD]` Uploaded ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}"
-                fi
+                continue
             fi
+        fi
+        show_write_log "Uploading ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}..."
+        UPLOAD_FILE=`${GDRIVE_BIN} upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
+        if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
+        then
+            show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}. Exit"
+            send_error_email "butgg [UPLOAD][FAIL]" "Can not upload backup file! ${UPLOAD_FILE}"
+            exit
+        else
+            show_write_log "`change_color green [UPLOAD]` Uploaded ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}"
         fi
     done
     show_write_log "Finish! All files and directories in ${BACKUP_DIR} are uploaded to Google Drive in directory ${TODAY}"

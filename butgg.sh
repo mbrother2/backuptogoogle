@@ -5,6 +5,7 @@ GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
 GO_FILE="go1.12.5.freebsd-amd64"
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
+DF_SYNC_FILE="No"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
 DF_GDRIVE_ID="None"
@@ -262,6 +263,9 @@ setup_config(){
     read -p " Which directory on your server do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
     read -p " How many days do you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE
     echo ""
+    echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/What-is-the-option-SYNC_FILE%3F"
+    read -p " Do you want only sync file(default no)(y/n): " SYNC_FILE
+    echo ""
     echo "Read more: https://github.com/mbrother2/backuptogoogle/wiki/Get-Google-folder-ID)"
     read -p " Your Google folder ID(default ${DF_GDRIVE_ID}): " GDRIVE_ID
     echo ""
@@ -273,6 +277,12 @@ setup_config(){
         read -p " Your Google email password: " EMAIL_PASS
         read -p " Which email will be receive notify?: " EMAIL_TO
     fi
+    if [ "${SYNC_FILE}" == "y" ]
+    then
+        SYNC_FILE="Yes"
+    else
+        SYNC_FILE="No"
+    fi
     echo ""
     echo "LOG_FILE=${LOG_FILE}" > ${BUTGG_CONF}
     write_config BACKUP_DIR "${DF_BACKUP_DIR}" "${BACKUP_DIR}"
@@ -281,6 +291,7 @@ setup_config(){
     write_config EMAIL_USER "${DF_EMAIL_USER}" "${EMAIL_USER}"
     write_config EMAIL_PASS "${DF_EMAIL_PASS}" "${EMAIL_PASS}" 
     write_config EMAIL_TO   "${DF_EMAIL_TO}"   "${EMAIL_TO}"
+    write_config SYNC_FILE  "${DF_SYNC_FILE}"  "${SYNC_FILE}"
     if [ $? -ne 0 ]
     then
         show_write_log "`change_color red [ERROR]` Can not write config to file ${BUTGG_CONF}. Please check permission of this file. Exit"

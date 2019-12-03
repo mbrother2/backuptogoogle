@@ -6,6 +6,7 @@ BUTGG_DEBUG="${HOME}/.gdrive/detail.log"
 BUTGG_EXCLUDE="${HOME}/.gdrive/exclude.list"
 GDRIVE_BIN="${HOME}/bin/gdrive"
 DF_BACKUP_DIR="${HOME}/backup"
+DF_SYNC_FILE="No"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
 DF_GDRIVE_ID="None"
@@ -106,6 +107,7 @@ get_config(){
         check_config EMAIL_USER ${DF_EMAIL_USER}
         check_config EMAIL_PASS ${DF_EMAIL_PASS}
         check_config EMAIL_TO ${DF_EMAIL_TO}
+        check_config SYNC_FILE ${DF_SYNC_FILE}
     else
         LOG_FILE=`cat ${BUTGG_CONF} | grep "^LOG_FILE"   | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config LOG_FILE ${DF_LOG_FILE} ${LOG_FILE}
@@ -121,6 +123,8 @@ get_config(){
         check_config EMAIL_PASS ${DF_EMAIL_PASS} ${EMAIL_PASS}
         EMAIL_TO=`cat ${BUTGG_CONF} | grep "^EMAIL_TO" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config EMAIL_TO ${DF_EMAIL_TO} ${EMAIL_TO}
+        SYNC_FILE=`cat ${BUTGG_CONF} | grep "^SYNC_FILE" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
+        check_config SYNC_FILE ${DF_SYNC_FILE} ${SYNC_FILE}
     fi
 }
 
@@ -278,9 +282,51 @@ remove_old_dir(){
     fi
 }
 
+run_sync(){
+    show_write_log "Checking Google folder ID..."
+    if [ "${GDRIVE_ID}" == "None" ]
+    then
+        show_write_log "`change_color yellow [CHECKS][FAIL]` Google folder ID not config. Exit"
+        send_error_email "butgg [CHECKS][FAIL]" "Google folder ID not config"
+        exit 1
+    else
+        CHECK_GDRIVE_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep " dir " | awk '{print $1}' | grep -c "^${GDRIVE_ID}$"`
+        if [ $? -ne 0 ]
+        then
+            show_write_log "`change_color yellow [CHECKS][FAIL]` Can not find Google folder ID ${GDRIVE_ID} . Exit"
+            send_error_email "butgg [CHECKS][FAIL]" "Can not find Google folder ID ${GDRIVE_ID}"
+            exit 1
+        else
+            show_write_log "Check Google folder ID successful"
+        fi
+    fi
+    show_write_log "Start sync to Google Drive..."
+    ${GDRIVE_BIN} sync upload --keep-local --delete-extraneous "${BACKUP_DIR}" "${GDRIVE_ID}" | while IFS= read -r line; do printf '[ %s ] %s\n' "$(date '+%d/%m/%Y %H:%M:%S')" "$line" | tee -a ${LOG_FILE}; done
+    if [ $? -eq 0 ]
+    then
+        show_write_log "Finish! All files and directories in ${BACKUP_DIR} are synced to Google Drive"
+    else
+        echo `date "+[ %d/%m/%Y %H:%M:%S ]"` "---" >> ${BUTGG_DEBUG}
+        ${GDRIVE_BIN} sync upload "${BACKUP_DIR}" "${GDRIVE_ID}" >> ${BUTGG_DEBUG}
+        show_write_log "`change_color red [SYNC][FAIL]` Can not sync file!. See ${BUTGG_DEBUG} for more detail. Exit"
+        send_error_email "butgg [SYNC][FAIL]" "Can not sync file"
+        exit 1
+    fi
+}
+
 # Main functions
 get_config
 detect_os
 check_info
-run_upload
-remove_old_dir
+if [ "${SYNC_FILE}" == "No" ]
+then
+    run_upload
+    remove_old_dir
+elif [ "${SYNC_FILE}" == "Yes" ]
+then
+    run_sync
+else
+    show_write_log "`change_color yellow [CHECKS][FAIL]` Option SYNC_FILE=${SYNC_FILE} not support. Only Yes or No. Exit"
+    send_error_email "butgg [CHECKS][FAIL]" "Option SYNC_FILE=${SYNC_FILE} not support"
+    exit 1
+fi

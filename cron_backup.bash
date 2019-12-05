@@ -347,7 +347,7 @@ run_sync(){
         fi
     fi
     show_write_log "Start sync to Google Drive..."
-    ${GDRIVE_BIN} sync upload --keep-local --delete-extraneous "${BACKUP_DIR}" "${GDRIVE_ID}" | while IFS= read -r line; do printf '[ %s ] %s\n' "$(date '+%d/%m/%Y %H:%M:%S')" "$line" | tee -a ${HOME}/${RANDOM_STRING}.tmp; done
+    ${GDRIVE_BIN} sync upload --no-progress --keep-local --delete-extraneous "${BACKUP_DIR}" "${GDRIVE_ID}" | while IFS= read -r line; do printf '[ %s ] %s\n' "$(date '+%d/%m/%Y %H:%M:%S')" "$line" | tee -a ${HOME}/${RANDOM_STRING}.tmp; done
     CHECK_SYNC=`cat ${HOME}/${RANDOM_STRING}.tmp | grep -c "Root directory is not empty"`
     if [ ${CHECK_SYNC} -eq 0 ]
     then

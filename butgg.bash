@@ -5,6 +5,7 @@ GITHUB_LINK="https://raw.githubusercontent.com/mbrother2/backuptogoogle/master"
 GO_FILE="go1.12.5.linux-amd64"
 BUTGG_CONF="${HOME}/.gdrive/butgg.conf"
 DF_BACKUP_DIR="${HOME}/backup"
+DF_TAR_BEFORE_UPLOAD="No"
 DF_SYNC_FILE="No"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
@@ -284,6 +285,12 @@ setup_config(){
         echo "Because you choose sync file method, so you must enter exactly Google folder ID here!"
     fi
     read -p " Your Google folder ID(default ${DF_GDRIVE_ID}): " GDRIVE_ID
+    if [ "${SYNC_FILE}" == "y" ]
+    then
+        TAR_BEFORE_UPLOAD=${DF_TAR_BEFORE_UPLOAD}
+    else
+        read -p " Do you want compress directory before upload?(default no)(y/n): " TAR_BEFORE_UPLOAD
+    fi
     echo ""
     echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/Turn-on-2-Step-Verification-&-create-app's-password-for-Google-email"
     read -p " Do you want to send email if upload error(default no)(y/n): " SEND_EMAIL
@@ -299,7 +306,12 @@ setup_config(){
     else
         SYNC_FILE="No"
     fi
-    echo ""
+    if [ "${TAR_BEFORE_UPLOAD}" == "y" ]
+    then
+        TAR_BEFORE_UPLOAD="Yes"
+    else
+        TAR_BEFORE_UPLOAD=${DF_TAR_BEFORE_UPLOAD}
+    fi
     echo "LOG_FILE=${LOG_FILE}" > ${BUTGG_CONF}
     write_config BACKUP_DIR "${DF_BACKUP_DIR}" "${BACKUP_DIR}"
     write_config DAY_REMOVE "${DF_DAY_REMOVE}" "${DAY_REMOVE}"
@@ -308,6 +320,7 @@ setup_config(){
     write_config EMAIL_PASS "${DF_EMAIL_PASS}" "${EMAIL_PASS}" 
     write_config EMAIL_TO   "${DF_EMAIL_TO}"   "${EMAIL_TO}"
     write_config SYNC_FILE  "${DF_SYNC_FILE}"  "${SYNC_FILE}"
+    write_config TAR_BEFORE_UPLOAD "${DF_TAR_BEFORE_UPLOAD}" "${TAR_BEFORE_UPLOAD}"
     if [ $? -ne 0 ]
     then
         show_write_log "`change_color red [ERROR]` Can not write config to file ${BUTGG_CONF}. Please check permission of this file. Exit"
@@ -324,6 +337,7 @@ setup_config(){
 
 # Set up cron backup
 setup_cron(){
+    echo ""
     show_write_log "Setting up cron backup..."
     CHECK_BIN=`echo $PATH | grep -c "${HOME}/bin"`
     if [ ${CHECK_BIN} -eq 0 ]

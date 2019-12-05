@@ -6,6 +6,7 @@ BUTGG_DEBUG="${HOME}/.gdrive/detail.log"
 BUTGG_EXCLUDE="${HOME}/.gdrive/exclude.list"
 GDRIVE_BIN="${HOME}/bin/gdrive"
 DF_BACKUP_DIR="${HOME}/backup"
+DF_TAR_BEFORE_UPLOAD="No"
 DF_SYNC_FILE="No"
 DF_LOG_FILE="${HOME}/.gdrive/butgg.log"
 DF_DAY_REMOVE="7"
@@ -17,6 +18,7 @@ FIRST_OPTION=$1
 
 # Date variables
 TODAY=`date +"%d_%m_%Y"`
+RANDOM_STRING=`date +%s | sha256sum | base64 | head -c 16`
 
 # Color variables
 GREEN='\e[32m'
@@ -108,6 +110,7 @@ get_config(){
         check_config EMAIL_PASS ${DF_EMAIL_PASS}
         check_config EMAIL_TO ${DF_EMAIL_TO}
         check_config SYNC_FILE ${DF_SYNC_FILE}
+        check_config TAR_BEFORE_UPLOAD ${DF_TAR_BEFORE_UPLOAD}
     else
         LOG_FILE=`cat ${BUTGG_CONF} | grep "^LOG_FILE"   | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config LOG_FILE ${DF_LOG_FILE} ${LOG_FILE}
@@ -125,6 +128,8 @@ get_config(){
         check_config EMAIL_TO ${DF_EMAIL_TO} ${EMAIL_TO}
         SYNC_FILE=`cat ${BUTGG_CONF} | grep "^SYNC_FILE" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config SYNC_FILE ${DF_SYNC_FILE} ${SYNC_FILE}
+        TAR_BEFORE_UPLOAD=`cat ${BUTGG_CONF} | grep "^TAR_BEFORE_UPLOAD" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
+        check_config TAR_BEFORE_UPLOAD ${DF_TAR_BEFORE_UPLOAD} ${TAR_BEFORE_UPLOAD}
     fi
 }
 
@@ -225,31 +230,72 @@ run_upload(){
     else
         :
     fi
-    BACKUP_DIR=`realpath ${BACKUP_DIR}`
-    for i in $(ls -1 ${BACKUP_DIR})
-    do
-        check_file_type "${BACKUP_DIR}/$i"
-        if [ -f "${BUTGG_EXCLUDE}" ]
+    if [ "${TAR_BEFORE_UPLOAD}" == "Yes" ]
+    then
+        show_write_log "Compressing backup directory..."
+        cd ${BACKUP_DIR}        
+        BACKUP_DIR_NAME=`basename ${BACKUP_DIR}`
+        tar -zcf ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz *
+        if [ $? -ne 0 ]
         then
-            CHECK_EXCLUDE=`cat "${BUTGG_EXCLUDE}" | grep -c "^$i$"`
-            if [ ${CHECK_EXCLUDE} -ne 0 ]
-            then
-                show_write_log "`change_color green [INFO]` ${FILE_TYPE^} $i in list exclude. Skip upload"
-                continue
-            fi
+            show_write_log "`change_color red [COMPRESS][FAIL]` Can not compress ${BACKUP_DIR}. Exit"
+            send_error_email "butgg [COMPRESS][FAIL]" "Can not compress ${BACKUP_DIR}"
+            exit 1    
+        else
+            show_write_log "`change_color green [COMPRESS]` Compress ${BACKUP_DIR} successful"
         fi
-        show_write_log "Uploading ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}..."
-        UPLOAD_FILE=`${GDRIVE_BIN} upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
+        show_write_log "Uploading ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz to directory ${TODAY}..."
+        UPLOAD_FILE=`${GDRIVE_BIN} upload -p ${ID_DIR} ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz`
         if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
         then
-            show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file! ${UPLOAD_FILE}. Exit"
-            send_error_email "butgg [UPLOAD][FAIL]" "Can not upload backup file! ${UPLOAD_FILE}"
-            exit
+            show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz. Exit"
+            send_error_email "butgg [UPLOAD][FAIL]" "Can not upload backup file ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz"
+            exit 1
         else
-            show_write_log "`change_color green [UPLOAD]` Uploaded ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}"
+            show_write_log "`change_color green [UPLOAD]` Uploaded ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz to directory ${TODAY}"
         fi
-    done
-    show_write_log "Finish! All files and directories in ${BACKUP_DIR} are uploaded to Google Drive in directory ${TODAY}"
+        show_write_log "Removing ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz after upload..."
+        rm -f ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz
+        if [ $? -ne 0 ]
+        then
+            show_write_log "`change_color red [REMOVE][FAIL]` Can not remove ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz. You must delete it manually"
+            send_error_email "butgg [REMOVE][FAIL]" "Can not remove ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz. You must delete it manually"  
+        else
+            show_write_log "`change_color green [REMOVE]` Remove ${BACKUP_DIR_NAME}_${RANDOM_STRING}.tar.gz successful"
+        fi
+    elif [ "${TAR_BEFORE_UPLOAD}" == "No" ]
+    then
+        show_write_log "`change_color green [INFO]` You do not compress directory before upload"
+        BACKUP_DIR=`realpath ${BACKUP_DIR}`
+        for i in $(ls -1 ${BACKUP_DIR})
+        do
+            check_file_type "${BACKUP_DIR}/$i"
+            if [ -f "${BUTGG_EXCLUDE}" ]
+            then
+                CHECK_EXCLUDE=`cat "${BUTGG_EXCLUDE}" | grep -c "^$i$"`
+                if [ ${CHECK_EXCLUDE} -ne 0 ]
+                then
+                    show_write_log "`change_color green [INFO]` ${FILE_TYPE^} $i in list exclude. Skip upload"
+                    continue
+                fi
+            fi
+            show_write_log "Uploading ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}..."
+            UPLOAD_FILE=`${GDRIVE_BIN} upload -p ${ID_DIR} --recursive ${BACKUP_DIR}/$i`
+            if [[ "${UPLOAD_FILE}" == *"Error"* ]] || [[ "${UPLOAD_FILE}" == *"Fail"* ]]
+            then
+                show_write_log "`change_color red [UPLOAD][FAIL]` Can not upload backup file ${UPLOAD_FILE}. Exit"
+                send_error_email "butgg [UPLOAD][FAIL]" "Can not upload backup file! ${UPLOAD_FILE}"
+                exit 1
+            else
+                show_write_log "`change_color green [UPLOAD]` Uploaded ${FILE_TYPE} ${BACKUP_DIR}/$i to directory ${TODAY}"
+            fi
+        done
+        show_write_log "Finish! All files and directories in ${BACKUP_DIR} are uploaded to Google Drive in directory ${TODAY}"
+    else
+        show_write_log "`change_color yellow [CHECKS][FAIL]` Option TAR_BEFORE_UPLOAD=${TAR_BEFORE_UPLOAD} not support. Only Yes or No. Exit"
+        send_error_email "butgg [CHECKS][FAIL]" "Option TAR_BEFORE_UPLOAD=${TAR_BEFORE_UPLOAD} not support"
+        exit 1
+    fi
 }
 
 remove_old_dir(){

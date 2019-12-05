@@ -1,3 +1,7 @@
+#### butgg 1.5.0 (05/12/2019) New feature & Improvement
+- [New feature] Compress directory before upload option
+- [Improvement] Show help if run butgg.bash with not support option
+
 #### butgg 1.4.0 (03/12/2019) New feature & Fix bug
 - [New feature] Only sync data from local to Google Drive option
 - [Fix bug] Run upload normaly if file exclude.list does not exist

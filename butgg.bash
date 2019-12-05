@@ -193,13 +193,16 @@ check_network(){
         show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Github file, please check your network. Exit"
         exit 1
     fi
-    curl -sI 1 dl.google.com >/dev/null
-    if [ $? -eq 0 ]
+    if [ "${FIRST_OPTION}" != "--update" ]
     then
-        show_write_log "Connect Google successful"
-    else
-        show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Google, please check your network. Exit"
-        exit 1
+        curl -sI 1 dl.google.com >/dev/null
+        if [ $? -eq 0 ]
+        then
+            show_write_log "Connect Google successful"
+        else
+            show_write_log "`change_color red [CHECKS][FAIL]` Can not connect to Google, please check your network. Exit"
+            exit 1
+        fi
     fi
 }
 

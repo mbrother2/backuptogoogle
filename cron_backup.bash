@@ -347,13 +347,18 @@ run_sync(){
         fi
     fi
     show_write_log "Start sync to Google Drive..."
-    ${GDRIVE_BIN} sync upload --keep-local --delete-extraneous "${BACKUP_DIR}" "${GDRIVE_ID}" | while IFS= read -r line; do printf '[ %s ] %s\n' "$(date '+%d/%m/%Y %H:%M:%S')" "$line" | tee -a ${LOG_FILE}; done
-    if [ $? -eq 0 ]
+    ${GDRIVE_BIN} sync upload --keep-local --delete-extraneous "${BACKUP_DIR}" "${GDRIVE_ID}" | while IFS= read -r line; do printf '[ %s ] %s\n' "$(date '+%d/%m/%Y %H:%M:%S')" "$line" | tee -a ${HOME}/${RANDOM_STRING}.tmp; done
+    CHECK_SYNC=`cat ${RANDOM_STRING}.tmp | grep -c "Root directory is not empty"`
+    if [ ${CHECK_SYNC} -eq 0 ]
     then
+        cat ${HOME}/${RANDOM_STRING}.tmp >> ${LOG_FILE}
+        rm -f ${HOME}/${RANDOM_STRING}.tmp
         show_write_log "Finish! All files and directories in ${BACKUP_DIR} are synced to Google Drive"
     else
+        echo "" >> ${BUTGG_DEBUG}
         echo `date "+[ %d/%m/%Y %H:%M:%S ]"` "---" >> ${BUTGG_DEBUG}
-        ${GDRIVE_BIN} sync upload "${BACKUP_DIR}" "${GDRIVE_ID}" >> ${BUTGG_DEBUG}
+        cat ${HOME}/${RANDOM_STRING}.tmp >> ${BUTGG_DEBUG}
+        rm -f ${HOME}/${RANDOM_STRING}.tmp
         show_write_log "`change_color red [SYNC][FAIL]` Can not sync file!. See ${BUTGG_DEBUG} for more detail. Exit"
         send_error_email "butgg [SYNC][FAIL]" "Can not sync file"
         exit 1

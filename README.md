@@ -7,6 +7,8 @@
 - Complie gdrive (https://github.com/gdrive-org/gdrive) on your server with your Google credential
 - Create cron auto backup
 - Exclude file/directory when run cron backup
+- Sync backup directory from local to Google Drive
+- Compress backup directory before upload
 - Send error email if upload to Google Drive fail
 - Auto remove old backup on Google Drive
 - Run upload from your backup directory to Google Drive whenever you want

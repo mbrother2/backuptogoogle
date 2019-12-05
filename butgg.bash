@@ -459,7 +459,8 @@ _setup(){
                 show_info
                 ;;
             *)
-                show_write_log "No such command: ${SECOND_OPTION}. Please use butgg.bash --help"
+                show_write_log "No such command: ${SECOND_OPTION}"
+                _help
                 ;;
         esac
     fi
@@ -515,10 +516,10 @@ _help(){
 }
 
 # Main functions
-case $1 in
+case ${FIRST_OPTION} in
     --help)      _help ;;
     --setup)     _setup ;;
     --update)    _update ;;
     --uninstall) _uninstall ;;
-    *)           echo "No such option: $1. Please use butgg.bash --help" ;;
+    *)           echo "No such option: ${FIRST_OPTION}"; _help ;;
 esac

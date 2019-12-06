@@ -24,7 +24,7 @@ $HOME (/root or /home/$USER)
         ├── butgg.conf
         ├── butgg.log
         ├── exclude.list (exist if you create)
-        ├── detail.log (exist if config email & upload fail)
+        ├── detail.log (debug log if run fail)
         └── token_v2.json
 ```
 # OS support(x86_64):

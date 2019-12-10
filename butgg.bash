@@ -245,7 +245,7 @@ build_gdrive(){
         show_write_log "Build gdrive successful. Gdrive bin locate here ${GDRIVE_BIN} "
     fi
     mv $HOME/bin/gdrive/gdrive $HOME/bin/gdrive.bin
-    chmod 755 $HOME/bin/gdrive
+    chmod 755 $HOME/bin/gdrive.bin
     rm -f $HOME/bin/${GO_FILE}.tar.gz
     rm -rf $HOME/bin/go
     rm -rf $HOME/bin/gdrive

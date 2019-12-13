@@ -1,8 +1,5 @@
 # backuptogoogle (Linux: butgg.bash - BSD: butgg.sh)
 
-# Say goodbye with git clone, go build, complie gdrive!
-## I wrote a simple scirpt ONLY use curl to backup from your server( hosting) to Google Drive. Please try here: https://github.com/mbrother2/butgg
-
 # What can this script do?
 - Complie gdrive (https://github.com/gdrive-org/gdrive) on your server with your Google credential
 - Create cron auto backup
@@ -24,7 +21,7 @@ $HOME (/root or /home/$USER)
         ├── butgg.conf
         ├── butgg.log
         ├── exclude.list (exist if you create)
-        ├── detail.log (exist if config email & upload fail)
+        ├── detail.log (debug log if run fail)
         └── token_v2.json
 ```
 # OS support(x86_64):

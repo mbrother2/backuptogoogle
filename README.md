@@ -1,5 +1,8 @@
 # backuptogoogle (Linux: butgg.bash - BSD: butgg.sh)
 
+### Tired of gdrive? Gdrive project dead? I wrote some scripts to use [rclone](https://github.com/rclone/rclone) for backuping from your server to Google Drive. Please try here:
+### https://github.com/mbrother2/butdr
+
 # What can this script do?
 - Complie gdrive (https://github.com/gdrive-org/gdrive) on your server with your Google credential
 - Create cron auto backup

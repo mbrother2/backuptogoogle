@@ -191,7 +191,7 @@ run_upload(){
     else
         show_write_log "Checking Google folder ID..."
         CHECK_GDRIVE_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep " dir " | awk '{print $1}' | grep -c "^${GDRIVE_ID}$"`
-        if [ $? -ne 0 ]
+        if [ ${CHECK_GDRIVE_ID} -ne 1 ]
         then
             show_write_log "`change_color yellow [CHECKS][FAIL]` Can not find Google folder ID ${GDRIVE_ID} . Exit"
             send_error_email "butgg [CHECKS][FAIL]" "Can not find Google folder ID ${GDRIVE_ID}"

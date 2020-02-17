@@ -187,11 +187,11 @@ run_upload(){
     show_write_log "Start upload to Google Drive..."
     if [ "${GDRIVE_ID}" == "None" ]
     then
-        CHECK_BACKUP_DIR=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep -c "${TODAY}"`
+        CHECK_BACKUP_DIR=`${GDRIVE_BIN} list --query "'root' in parents and trashed = false" -m 100000 --name-width 0 | grep -c "${TODAY}"`
     else
         show_write_log "Checking Google folder ID..."
-        CHECK_GDRIVE_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep " dir " | awk '{print $1}' | grep -c "^${GDRIVE_ID}$"`
-        if [ ${CHECK_GDRIVE_ID} -ne 1 ]
+        CHECK_GDRIVE_ID=`${GDRIVE_BIN} info "${GDRIVE_ID}" | grep -c "Error 404: File not found:"`
+        if [ ${CHECK_GDRIVE_ID} -ne 0 ]
         then
             show_write_log "`change_color yellow [CHECKS][FAIL]` Can not find Google folder ID ${GDRIVE_ID} . Exit"
             send_error_email "butgg [CHECKS][FAIL]" "Can not find Google folder ID ${GDRIVE_ID}"

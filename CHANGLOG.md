@@ -1,3 +1,6 @@
+#### butgg 1.5.1 (17/02/2020) Improvement
+- [Improvement] Improve check Google Drive folder ID
+
 #### butgg 1.5.0 (05/12/2019) New feature & Improvement
 - [New feature] Compress directory before upload option
 - [Improvement] Show help if run butgg.bash with not support option
@@ -10,7 +13,7 @@
 - [New feature] Exclude file/directory in cron backup
 
 #### butgg 1.2.2 (27/11/2019) Improvement
-- [Improvement] Improve checking network to connect to Github & Google
+- [Improvement] Improve check network to connect to Github & Google
 
 #### butgg 1.2.1 (25/11/2019) Add support
 - [Add support] Support Debian

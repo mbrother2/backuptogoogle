@@ -112,7 +112,7 @@ get_config(){
         check_config SYNC_FILE ${DF_SYNC_FILE}
         check_config TAR_BEFORE_UPLOAD ${DF_TAR_BEFORE_UPLOAD}
     else
-        LOG_FILE=`cat ${BUTGG_CONF} | grep "^LOG_FILE"   | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
+        LOG_FILE=`cat ${BUTGG_CONF} | grep "^LOG_FILE" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config LOG_FILE ${DF_LOG_FILE} ${LOG_FILE}
         BACKUP_DIR=`cat ${BUTGG_CONF} | grep "^BACKUP_DIR" | cut -d"=" -f2 | sed 's/"//g' | sed "s/'//g"`
         check_config BACKUP_DIR ${DF_BACKUP_DIR} ${BACKUP_DIR}         
@@ -214,7 +214,7 @@ run_upload(){
         show_write_log "Directory ${TODAY} existed. Skipping..."
         if [ "${GDRIVE_ID}" == "None" ]
         then
-            ID_DIR=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
+            ID_DIR=`${GDRIVE_BIN} list --query "'root' in parents and trashed = false" -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
         else
             ID_DIR=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents and trashed = false" -m 100000 --name-width 0 | grep "${TODAY}" | head -1 | awk '{print $1}'`
         fi
@@ -302,7 +302,7 @@ remove_old_dir(){
     OLD_BACKUP_DAY=`date +%d_%m_%Y -d "-${DAY_REMOVE} day"`
     if [ "${GDRIVE_ID}" == "None" ]
     then
-        OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+        OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "'root' in parents and trashed = false" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
     else
         OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents and trashed = false" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
     fi
@@ -311,7 +311,7 @@ remove_old_dir(){
         ${GDRIVE_BIN} delete -r ${OLD_BACKUP_ID}
         if [ "${GDRIVE_ID}" == "None" ]
         then
-            OLD_BACKUP_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
+            OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "'root' in parents and trashed = false" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
         else
             OLD_BACKUP_ID=`${GDRIVE_BIN} list --query "\"${GDRIVE_ID}\" in parents and trashed = false" -m 100000 --name-width 0 | grep "${OLD_BACKUP_DAY}" | awk '{print $1}'`
         fi
@@ -336,8 +336,8 @@ run_sync(){
         send_error_email "butgg [CHECKS][FAIL]" "Google folder ID not config"
         exit 1
     else
-        CHECK_GDRIVE_ID=`${GDRIVE_BIN} list -m 100000 --name-width 0 | grep " dir " | awk '{print $1}' | grep -c "^${GDRIVE_ID}$"`
-        if [ $? -ne 0 ]
+        CHECK_GDRIVE_ID=`${GDRIVE_BIN} info "${GDRIVE_ID}" | grep -c "Error 404: File not found:"`
+        if [ ${CHECK_GDRIVE_ID} -ne 0 ]
         then
             show_write_log "`change_color yellow [CHECKS][FAIL]` Can not find Google folder ID ${GDRIVE_ID} . Exit"
             send_error_email "butgg [CHECKS][FAIL]" "Can not find Google folder ID ${GDRIVE_ID}"

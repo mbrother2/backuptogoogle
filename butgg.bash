@@ -176,6 +176,7 @@ detect_os(){
     show_write_log "OS supported"
     show_write_log "Checking necessary package..."
     check_package curl
+    check_package realpath
     if [ "${FIRST_OPTION}" != "--update" ]
     then
         check_package git

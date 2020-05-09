@@ -419,3 +419,5 @@ Run upload to Google Drive immediately with show log detail
 [ 14/11/2019 10:59:04 ] Finish! All files and directories in /home/thanh1/backup2/backup are uploaded to Google Drive in directory 14_11_2019
 [ 14/11/2019 10:59:05 ] Directory 15_10_2019 does not exist. Nothing need remove!
 ```
+# Thank you for support!
+If you like my script, please buy me a coffee at https://www.buymeacoffee.com/mbrother2 :)

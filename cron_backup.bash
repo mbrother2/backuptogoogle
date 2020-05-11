@@ -101,7 +101,7 @@ check_config(){
 # Get config
 get_config(){
     if [ ! -f ${BUTGG_CONF} ]
-    then DF_SYNC_FILE
+    then
         check_config LOG_FILE ${DF_LOG_FILE}
         check_config BACKUP_DIR ${DF_BACKUP_DIR}
         check_config DAY_REMOVE ${DF_DAY_REMOVE}

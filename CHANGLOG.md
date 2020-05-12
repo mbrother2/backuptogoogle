@@ -1,3 +1,6 @@
+#### butgg 1.5.1 (12/05/2020) Support docker & docker-compose (beta)
+- [BETA] Support docker & docker-compose
+
 #### butgg 1.5.1 (17/02/2020) Improvement
 - [Improvement] Improve check Google Drive folder ID
 

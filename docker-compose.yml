@@ -7,7 +7,6 @@ services:
     environment:
       - GG_CLIENT_ID=xxxxxx
       - GG_CLIENT_SECRET=xxxxxx
-      - BACKUP_DIR=/root/backup
       - TAR_BEFORE_UPLOAD=No
       - SYNC_FILE=No
       - DAY_REMOVE=7
@@ -19,5 +18,5 @@ services:
     volumes:
       - /root/gdrive:/root/bin
       - /root/conf:/root/.gdrive
-      - /root:/root/backup # Directory in container must same BACKUP_DIR
+      - /your_dir_you_want_to_backup_on_host_machine:/root/backup
     restart: always

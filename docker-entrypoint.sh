@@ -92,10 +92,6 @@ setup_credential(){
 setup_config(){
     show_write_log "Setting up config file..."
     echo ""
-    if [ -z ${BACKUP_DIR} ]
-    then
-        read -p " Which directory on your server do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
-    fi
     if [ -z ${DAY_REMOVE} ]
     then
         read -p " How many days do you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE
@@ -150,7 +146,7 @@ setup_config(){
         TAR_BEFORE_UPLOAD=${DF_TAR_BEFORE_UPLOAD}
     fi
     echo "LOG_FILE=${LOG_FILE}" > ${BUTGG_CONF}
-    write_config BACKUP_DIR "${DF_BACKUP_DIR}" "${BACKUP_DIR}"
+    write_config BACKUP_DIR "${DF_BACKUP_DIR}" "${DF_BACKUP_DIR}"
     write_config DAY_REMOVE "${DF_DAY_REMOVE}" "${DAY_REMOVE}"
     write_config GDRIVE_ID  "${DF_GDRIVE_ID}"  "${GDRIVE_ID}"
     write_config EMAIL_USER "${DF_EMAIL_USER}" "${EMAIL_USER}"

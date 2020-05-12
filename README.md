@@ -36,7 +36,7 @@ $HOME (/root or /home/$USER)
 - Server, VPS, shared hosting
 
 ---
-[BETA] Support docker & docker-compose
+# [BETA] Support docker & docker-compose
 For more informations: https://hub.docker.com/r/mbrother2/backuptogoogle
 
 ---

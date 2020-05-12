@@ -34,6 +34,11 @@ $HOME (/root or /home/$USER)
 - **Windows:** Build gdrive only
 # Environment
 - Server, VPS, shared hosting
+
+---
+[BETA] Support docker & docker-compose
+For more informations: https://hub.docker.com/r/mbrother2/backuptogoogle
+
 ---
 # How to use
 **On Linux system:**

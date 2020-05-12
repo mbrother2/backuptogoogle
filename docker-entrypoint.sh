@@ -92,32 +92,50 @@ setup_credential(){
 setup_config(){
     show_write_log "Setting up config file..."
     echo ""
-    read -p " Which directory on your server do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
-    read -p " How many days do you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE
-    echo ""
-    echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/What-is-the-option-SYNC_FILE%3F"
-    read -p " Do you want only sync file(default no)(y/n): " SYNC_FILE
-    echo ""
-    echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/Get-Google-folder-ID"
-    if [ "${SYNC_FILE}" == "y" ]
+    if [ -z ${BACKUP_DIR} ]
     then
-        echo "Because you choose sync file method, so you must enter exactly Google folder ID here!"
+        read -p " Which directory on your server do you want to upload to Google Drive?(default ${DF_BACKUP_DIR}): " BACKUP_DIR
     fi
-    read -p " Your Google folder ID(default ${DF_GDRIVE_ID}): " GDRIVE_ID
-    if [ "${SYNC_FILE}" == "y" ]
+    if [ -z ${DAY_REMOVE} ]
     then
-        TAR_BEFORE_UPLOAD=${DF_TAR_BEFORE_UPLOAD}
-    else
-        read -p " Do you want compress directory before upload?(default no)(y/n): " TAR_BEFORE_UPLOAD
+        read -p " How many days do you want to keep backup on Google Drive?(default ${DF_DAY_REMOVE}): " DAY_REMOVE
     fi
-    echo ""
-    echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/Turn-on-2-Step-Verification-&-create-app's-password-for-Google-email"
-    read -p " Do you want to send email if upload error(default no)(y/n): " SEND_EMAIL
-    if [ "${SEND_EMAIL}" == "y" ]
+    if [ -z ${SYNC_FILE} ]
     then
-        read -p " Your Google email user name: " EMAIL_USER
-        read -p " Your Google email password: " EMAIL_PASS
-        read -p " Which email will be receive notify?: " EMAIL_TO
+        echo ""
+        echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/What-is-the-option-SYNC_FILE%3F"
+        read -p " Do you want only sync file(default no)(y/n): " SYNC_FILE
+    fi
+    if [ -z ${GDRIVE_ID} ]
+    then
+        echo ""
+        echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/Get-Google-folder-ID"
+        if [ "${SYNC_FILE}" == "y" ]
+        then
+            echo "Because you choose sync file method, so you must enter exactly Google folder ID here!"
+        fi
+        read -p " Your Google folder ID(default ${DF_GDRIVE_ID}): " GDRIVE_ID
+    fi
+    if [ -z ${TAR_BEFORE_UPLOAD} ]
+    then
+        if [ "${SYNC_FILE}" == "y" ]
+        then
+            TAR_BEFORE_UPLOAD=${DF_TAR_BEFORE_UPLOAD}
+        else
+            read -p " Do you want compress directory before upload?(default no)(y/n): " TAR_BEFORE_UPLOAD
+        fi
+    fi
+    if [[ -z ${EMAIL_USER} ]] && [[ -z ${EMAIL_PASS} ]] && [[ -z ${EMAIL_TO} ]]
+    then
+        echo ""
+        echo "Read more https://github.com/mbrother2/backuptogoogle/wiki/Turn-on-2-Step-Verification-&-create-app's-password-for-Google-email"
+        read -p " Do you want to send email if upload error(default no)(y/n): " SEND_EMAIL
+        if [ "${SEND_EMAIL}" == "y" ]
+        then
+            read -p " Your Google email user name: " EMAIL_USER
+            read -p " Your Google email password: " EMAIL_PASS
+            read -p " Which email will be receive notify?: " EMAIL_TO
+        fi
     fi
     if [ "${SYNC_FILE}" == "y" ]
     then
@@ -142,8 +160,8 @@ setup_config(){
     write_config TAR_BEFORE_UPLOAD "${DF_TAR_BEFORE_UPLOAD}" "${TAR_BEFORE_UPLOAD}"
     if [ ! -d ${BACKUP_DIR} ]
     then
-        show_write_log "`change_color yellow [WARNING]` Directory ${BACKUP_DIR} does not exist! Ensure you will be create it after."
-        sleep 3
+        show_write_log "`change_color yellow [WARNING]` You does not mount your backup dir in host machine to ${BACKUP_DIR} on container! Please recreate container and ensure your backup dir has mounted to container."
+        exit 1
     fi   
     show_write_log "Setup config file successful"    
 }
